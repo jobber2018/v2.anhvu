@@ -1,0 +1,12 @@
+<?php
+    foreach ($privileges as $privilege) {
+        if($privilege['parent']==$privilegeId && $privilege['menu_display']==1){
+            ?>
+        <a class="btn btn-default" href="<?=$this->url($privilege['url'],['action'=>$privilege['action']])?>">
+            <i class="<?=$privilege['icon']?>" style="font-size: 25pt; padding-top: 5px"></i>
+            <p style="padding-top: 5px; margin-bottom: 5px; font-weight: bold"><?=$privilege['name']?></p>
+        </a>
+    <?php
+        }
+    }
+    ?>
