@@ -1,0 +1,162 @@
+<?php
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\ConfigManager;
+?>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-7">
+                <?=$this->partial('product/partial/info', ['product'=>$this->product]);?>
+            </div>
+            <div class="col-md-5">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history"></i>
+                            Lịch sử tồn kho
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display tbl-inventory-history">
+                            <thead>
+                            <tr>
+                                <th class="number">Thay đổi</th>
+                                <th class="number">Tồn trước</th>
+                                <th></th>
+                                <th>Thực hiện</th>
+                                <th>Thay đổi</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            foreach ($this->product->getHistory() as $history) {
+                                $note=$history->getNote();
+                                if($history->getUrl()) $note='<a style="font-weight: unset" href="'.$history->getUrl().'">'.$note.'</a>';
+                                echo '<tr>';
+                                echo '<td class="number">'.$history->getChange().'</td>';
+                                echo '<td class="number">'.$history->getInventory().'</td>';
+                                echo '<td>'.$note.'</td>';
+                                echo '<td>'.$history->getCreatedBy().'</td>';
+                                echo '<td>'.Common::formatDate($history->getCreatedDate()).'</td>';
+                                echo '</tr>';
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-pallet"></i>
+                            Lịch sử nhập hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display tbl-purchase-history">
+                            <thead>
+                            <tr>
+                                <th>NCC</th>
+                                <th class="number" nowrap="">SL</th>
+                                <th nowrap="">Trạng thái</th>
+                                <th nowrap="">Ngày nhập</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            foreach ($this->product->getVariants() as $variant){
+                                foreach ($variant->getPurchaseDetail() as $purchaseDetail){
+                                    echo '<tr>';
+                                    $urlDetailPurchase=$this->url('purchase-admin',['action'=>'detail','id'=>$purchaseDetail->getPurchase()->getPublicId()]);
+                                    echo '<td><a href="'.$urlDetailPurchase.'">'.$purchaseDetail->getPurchase()->getSupplier()->getName().'</a></td>';
+                                    echo '<td>'.Common::formatNumber($purchaseDetail->getQty()).' '.$purchaseDetail->getUnitName().'</td>';
+                                    echo '<td>'.$this->translate($purchaseDetail->getPurchase()->getStatus()).'</td>';
+                                    echo '<td>'.Common::formatDateTime($purchaseDetail->getPurchase()->getApprovedDate()).'</td>';
+                                    echo '</tr>';
+                                }
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-undo-alt"></i>
+                            Lịch sử trả hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover tbl-return-history">
+                            <thead>
+                            <tr>
+                                <th>NCC</th>
+                                <th class="number" nowrap="">Số lượng</th>
+                                <th nowrap="">Trạng thái</th>
+                                <th nowrap="">Ngày trả</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            foreach ($this->product->getVariants() as $variant){
+                                foreach ($variant->getPurchaseReturnDetail() as $purchaseReturnDetail){
+                                    echo '<tr>';
+                                    $urlDetailPurchase=$this->url('purchase-return-admin',['action'=>'detail','id'=>$purchaseReturnDetail->getPurchaseReturn()->getPublicId()]);
+                                    echo '<td><a href="'.$urlDetailPurchase.'">'.$purchaseReturnDetail->getPurchaseReturn()->getPurchase()->getSupplier()->getName().'</a></td>';
+                                    echo '<td>'.Common::formatNumber($purchaseReturnDetail->getQty()).' '.$purchaseReturnDetail->getUnitName().'</td>';
+                                    echo '<td>'.$this->translate($purchaseReturnDetail->getPurchaseReturn()->getStatus()).'</td>';
+                                    echo '<td>'.Common::formatDateTime($purchaseReturnDetail->getPurchaseReturn()->getApprovedDate()).'</td>';
+                                    echo '</tr>';
+                                }
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('.tbl-purchase-history, .tbl-inventory-history, .tbl-return-history').DataTable({
+            responsive:true,
+            select:true,
+            paging: true,
+            pageLength:10,
+            ordering: false,
+            info: false,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+            }
+        });
+    });
+</script>

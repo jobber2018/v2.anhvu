@@ -1,0 +1,569 @@
+<?php
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\ConfigManager;
+use Sulde\Service\Common\Define;
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="user-block">
+                            <img class="img-circle" src="/assets/images/avatar.png">
+                            <span class="username"><a href="#"><?=$this->purchase->getSupplier()->getName()?></a></span>
+                            <span class="description"><?=$this->purchase->getSupplier()->getAddress()?> - <?=Common::formatDateTime($this->purchase->getApprovedDate())?></span>
+                        </div>
+                        <div class="card-tools">
+                            <button id="btnReturn" class="btn btn-success">
+                                <i class="fa fa-plus"></i>
+                                Tạo phiếu trả
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display" id="tblProduct">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>No.</th>
+                                <th></th>
+                                <th>Barcode</th>
+                                <th>Tên sản phẩm</th>
+                                <th class="number">Quy cách</th>
+                                <th nowrap="">Đơn vị</th>
+                                <th class="number" nowrap="">Số lượng</th>
+                                <th class="number" nowrap="">Đơn giá</th>
+                                <th class="number" nowrap="">Thành tiền</th>
+                                <th nowrap="">Hoàn trả</th>
+                                <th nowrap="">Đơn vị</th>
+                                <th>Thuế GTGT(%)</th>
+                                <th>Tiền thuế GTGT</th>
+                                <th>Chiết khấu</th>
+                                <th>Tiền chiết khấu</th>
+                                <th>Tiền hoàn trả</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-default">
+                    <div class="card-body">
+                        <table style="width: 100%">
+                            <tr>
+                                <th class="border-bottom pb-2">Sản phẩm hoàn trả:</th>
+                                <th class="total-qty-return title text-right border-bottom pb-2">0</th>
+                            </tr>
+                            <tr>
+                                <th class="pb-2">Tổng tiền hoàn trả:</th>
+                                <th class="total-price-return price title text-right border-bottom pb-2">0</th>
+                            </tr>
+                        </table>
+                        <div>
+                            <textarea rows="2" name="note" class="form-control" id="note" placeholder="Lý do hoàn trả hàng?"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-default collapsed-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i>
+                            Thông tin đơn hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    <td>NCC: </td>
+                                    <td class="highlight text-danger"><?=$this->purchase->getSupplier()->getName()?></td>
+                                </tr>
+                                <tr>
+                                    <td>Mã đơn hàng: </td>
+                                    <td><?=$this->purchase->getOrderCode()?></td>
+                                </tr>
+                                <tr>
+                                    <td>Trạng thái: </td>
+                                    <td>
+                                        <?php
+                                        $cls=($this->purchase->getStatus()==0)?'label-success':'label-danger';
+                                        ?>
+                                        <span class="label <?=$cls?> label-form"><?=$this->purchase->getStatus()?></span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Tổng đơn: </td>
+                                    <td class="title price"></td>
+                                </tr>
+                                <tr>
+                                    <td>Ngày tạo: </td>
+                                    <td><?=Common::formatDateTime($this->purchase->getCreatedDate())?></td>
+                                </tr>
+                                <tr>
+                                    <td>Người tạo: </td>
+                                    <td><?=$this->purchase->getCreatedBy()?></td>
+                                </tr>
+                                <tr>
+                                    <td>Ngày duyệt: </td>
+                                    <td><?=Common::formatDateTime($this->purchase->getApprovedDate())?></td>
+                                </tr>
+                                <tr>
+                                    <td>Người duyệt: </td>
+                                    <td><?=$this->purchase->getApprovedBy()?></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-default purchase_summary_amount_preview"></div>
+                <?php
+                $totalPurchasePriceReturn=0;
+                if(count($this->purchase->getPurchaseReturn())){
+                    foreach($this->purchase->getPurchaseReturn() as $purchaeReturnItem){
+                        ?>
+                        <div class="card card-default">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    Trả lại
+                                </h3>
+                                <div class="card-tools">
+                                    <small class="badge badge-success"><?=$this->translate($purchaeReturnItem->getStatus())?></small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="note-info">
+                                    <?=$purchaeReturnItem->getNote()?>
+                                </div>
+
+                                <?php
+                                echo '<table class="table"><thead>';
+                                echo '<tr><th>Sản phẩm</th><th>SL</th><th>ĐV</th></tr></thead><tbody>';
+                                foreach($purchaeReturnItem->getPurchaseReturnDetail() as $purchaseReturnDetailItem){
+                                    echo '<tr class="return-item">'.
+                                        '<td class="title">'.$purchaseReturnDetailItem->getVariant()->getProduct()->getName().'</td>'.
+                                        '<td>'.Common::formatNumber($purchaseReturnDetailItem->getQty()).'</td>'.
+                                        '<td>'.$purchaseReturnDetailItem->getVariant()->getUnit()->getName().'</td>'.
+                                        '</tr>';
+                                    if($purchaeReturnItem->getStatus()==Define::STATUS_APPROVED){
+                                        $totalPurchasePriceReturn+=$purchaseReturnDetailItem->getQty()*$purchaseReturnDetailItem->getPrice();
+                                    }
+                                }
+                                echo '</tbody></table>';
+                                ?>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                }
+                //show getAdditionalFees neeus cos
+                if(count($this->purchase->getAdditionalFees())){
+                    ?>
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                Phụ phí
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <table>
+                                <?php
+                                foreach($this->purchase->getAdditionalFees() as $additionalFees) {
+                                    $amount=Common::formatMoney($additionalFees->getAmount());
+                                    $name = ($additionalFees->getSupplier()->getShortName())?$additionalFees->getSupplier()->getShortName():$additionalFees->getSupplier()->getName();
+                                    echo <<<HTML
+                                            <tr>
+                                                <td colspan="2">
+                                                    {$name}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width: 100%">{$additionalFees->getName()}</td>
+                                                <td nowrap class="price">{$amount}</td>
+                                            </tr>
+                                            HTML;
+                                }
+                                ?>
+                            </table>
+                        </div>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+
+<!--Datatable fixed column-->
+<script src="/vendor/adminlte/plugins/datatables/2.3.5/js/dataTables.fixedColumns.min.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/datatables/2.3.5/css/fixedColumns.dataTables.css">
+
+<?=$this->partial('purchase/partial/amount-info');?>
+
+<style>
+.table tr:first-child td{border-top: 0px}
+.purchase-info{padding-top: 0px!important;}
+.table {margin-bottom: 0px}
+</style>
+<script>
+    let tblProduct;
+    $( document ).ready(function() {
+        tblProduct=$('#tblProduct').DataTable({
+            responsive: isMobile,
+            fixedColumns: isMobile ? false : {
+                start: 4
+            },
+            select:true,
+            paging: true,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: false,
+            // info: false,
+            // order: [[ 1, "desc" ]],
+            stateSave: true,
+            autoWidth: false,
+            scrollCollapse: true,
+            scrollX: true,
+            scrollY: '60vh',
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+                top: ['search', 'pageLength']
+            },
+            language: {
+                searchPlaceholder: "Tìm kiếm theo tên sản phẩm."
+            },
+            columnDefs: [
+                {
+                    name:'rowData',
+                    targets: 0,
+                    visible: false
+                },{
+                    name: 'img',
+                    targets: 2,
+                    width: '50px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        if (cellData) {
+                            $(td).html('<img src="'+cellData+'">');
+                        }
+                    }
+                },{
+                    name: 'barcode',
+                    targets: 3,
+                    width: '50px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(subBarcode(cellData));
+                    }
+                },{
+                    name: 'name',
+                    targets: 4,
+                    width: '250px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let product=rowData[0].product;
+                        let content=`<label class="title name">${product.name}</label><br>`
+                        content+=(product.status==='<?=Define::DEFAULT_UN_ACTIVE?>' || product.status===null)?'<span class="badge badge-danger"><?=Define::PRODUCT_TEXT_UN_ACTIVE?></span> ':'';
+                        content+=(product?.purchase_detail_latest?.price)
+                            ?`<span class="badge badge-info" data-toggle="tooltip" data-placement="bottom" title="NCC: ${product.purchase_detail_latest.supplier.name}">
+                         Giá nhập gần đây: ${formatMoney(product.purchase_detail_latest.price)} ${product.purchase_detail_latest.unit_name}
+                         </span>`
+                            :'<span class="badge badge-info">Nhập lần đầu</span>';
+                        content +=`<span class="badge badge-warning">Tồn kho: ${product.inventory} ${product.unit.name}</span>`;
+                        $(td).html(content);
+                    }
+                },{
+                    targets: [5],
+                    width: '120px'
+                },{
+                    name: 'qty',
+                    targets: 7,
+                    className: 'title number'
+                },{
+                    name: 'price',
+                    targets: 8,
+                    width: '100px',
+                    className: 'number',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(formatMoney(cellData));
+                    }
+                },{
+                    name:'amount',
+                    targets: 9,
+                    width: '120px',
+                    className: 'price'
+                },{
+                    name: 'return_qty',
+                    targets: 10,
+                    width: '100px',
+                    className: 'editable highlight-col',
+                    createdCell: function (td, cellData, rowData, row, col){
+                        let input = $('<input type="number" min="0" class="form-control qty">');
+                        $(td).html(input);
+                    }
+                },{
+                    name: 'return_unit',
+                    targets: 11,
+                    width: '100px',
+                    className: 'editable highlight-col',
+                    createdCell: function (td, cellData, rowData, row, col){
+                        let select = $('<select class="form-control select variant-select"></select>');
+                        let variantSelectedId=rowData[0].variant.id;
+                        let variants=rowData[0].product.variants;
+                        // let oldValue=variantSelected?.id;
+                        variants.forEach(v => {
+                            const option = $('<option>').val(v.id).text(v.unit.name);
+                            if (v.id === variantSelectedId) option.attr('selected', 'selected');
+                            select.append(option);
+                        });
+                        // Gắn select vào cell
+                        $(td).html(select);
+                        // select.selectpicker();
+                        select.select2({theme: 'bootstrap4',minimumResultsForSearch: -1});
+                    }
+                },{
+                    name:'vat_amount',
+                    targets: 13,
+                    width: '100px',
+                    className: 'product-vat-amount'
+                },{
+                    name:'discount',
+                    targets: 14,
+                    width: '100px',
+                    className: 'text-right product-discount-type'
+                },{
+                    name:'discount_amount',
+                    targets: 15,
+                    width: '100px',
+                    className: 'product-discount-amount'
+                },{
+                    name:'product_return_amount',
+                    targets: 16,
+                    width: '120px',
+                    className: 'product-return-amount price'
+                }
+            ],
+            ajax: {
+                url: '<?=$this->url('purchase-admin',['action'=>'detail'])?>',
+                type: 'POST',
+                data:{id:<?=$this->purchase->getId()?>},
+                beforeSend: function(){
+                    $('#tblProduct > tbody').html(
+                        '<tr class="odd">' +
+                        '<td valign="top" colspan="10" style="font-size: 9pt" class="dataTables_empty">Đang tải dữ liệu&hellip;</td>' +
+                        '</tr>'
+                    );
+                },
+                dataSrc: function (response) {
+                    let purchase_summary={};
+                    purchase_summary.total_order_amount=formatMoney(response.total_order_amount)
+
+                    let total_discount_amount=getRawMoney(response.discount_amount.order_discount_amount) + getRawMoney(response.discount_amount.product_discount_amount);
+                    purchase_summary.order_discount_amount=formatMoney(response.discount_amount.order_discount_amount)
+                    purchase_summary.product_discount_amount=formatMoney(response.discount_amount.product_discount_amount)
+                    purchase_summary.total_discount_amount=formatMoney(total_discount_amount)
+
+                    purchase_summary.total_vat_amount=formatMoney(response.total_vat_amount)
+
+                    let total_product_payable = response.total_order_amount - total_discount_amount + response.total_vat_amount;
+                    purchase_summary.total_product_payable=formatMoney(total_product_payable);
+
+                    purchase_summary.total_additional_fees_amount=formatMoney(response.total_additional_fees_amount)
+
+                    let total_order_payable=total_product_payable+response.total_additional_fees_amount;
+                    purchase_summary.total_order_payable=formatMoney(total_order_payable)
+
+                    let template = $('#purchase-amount-info').html();
+                    let purchase_summary_amount_preview = Mustache.render(template, purchase_summary);
+                    $('.purchase_summary_amount_preview').html(purchase_summary_amount_preview)
+                    $('[data-toggle="tooltip"]').tooltip();
+
+
+                    let data=[];
+                    let i=1;
+                    console.log(response);
+                    $.each( response.purchase_detail, function( key, value ) {
+                        let dataItem=[];
+                        dataItem.push(value);
+                        dataItem.push(i++);
+                        dataItem.push(value.product.default_image);
+                        dataItem.push(value.variant.barcode_sub);
+                        dataItem.push(value.product.name);
+                        dataItem.push(value.variant.name);
+                        dataItem.push(value.unit_name);
+                        dataItem.push(formatNumber(value.qty));
+                        dataItem.push(value.price);
+                        dataItem.push(formatMoney(value.qty*value.price));
+                        dataItem.push('');
+                        dataItem.push('');
+                        dataItem.push(intVal(value.vat));
+                        dataItem.push(formatMoney(value.vat_amount));
+                        let discount = (value.discount_type==='<?=Define::PERCENT?>')?intVal(value.discount)+'%':formatMoneyVND(value.discount);
+                        dataItem.push(discount);
+                        dataItem.push(formatMoney(value.discount_amount));
+                        dataItem.push(0);
+                        data.push(dataItem);
+                    });
+                    return data;
+                }
+            }
+        });
+
+        $('#btnReturn').on('click', function(e){
+            let validate = validateDataEditable();
+            Swal.fire({
+                title: "Thêm mới thiếu trả hàng?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Tạp phiếu"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if(validate.isValid){
+                        let note=$('#note').val();
+                        run_waitMe();
+                        var url = "<?=$this->url('purchase-return-admin',['action'=>'add'])?>";
+                        $.ajax({
+                            method: "POST",
+                            headers: {Accept: "application/json; charset=utf-8"},
+                            url: url,
+                            data: {purchase_id:<?=$this->purchase->getId()?>,note:note,variants:validate.data}
+                        }).done(function (response) {
+                            if(response.status){
+                                waitMeMessage('Đã tạo phiếu trả hàng! '+'<?=Define::MESSAGE_WINDOW_REDIRECT?>')
+                                window.location.href = "<?=$this->url('purchase-return-admin',["action"=>'detail'])?>/"+response.purchase_return_id;
+                            }
+                            else{
+                                Toast.fire({title: response.message, icon: 'error'});
+                                stop_waitMe();
+                            }
+                        })
+                    }
+                    else{
+                        Toast.fire({title: validate.message, icon: 'error'});
+                    }
+                }
+            });
+        });
+        $("#tblProduct")
+            .on("keyup change", "input.qty", function() {
+                showInfo();
+            })
+            .on("change", ".variant-select", function() {
+                showInfo();
+            })
+    })
+
+    function validateDataEditable(){
+        const result = {isValid:1,message:'',data:[]};
+        $('#tblProduct tbody tr').each(function () {
+            let row = $(this);
+            let data = tblProduct.row(row).data()[0];
+            let variantSelectedId = row.find('td.editable select').val();
+            let qtyReturn = row.find('input[type="number"]').val();
+            qtyReturn=qtyReturn?parseFloat(qtyReturn):0;
+
+            row.find('td.editable').removeClass('bg-danger');
+            if(qtyReturn>0){
+                let maxReturnConversionRate = data.conversion_rate*data.qty;//so luong toi da co the tra lai theo thong tin don hang
+                let inventory = data.product.inventory;
+
+                let variants=data.product.variants;
+                let variantSelectedItem=variants.find(v => v.id == variantSelectedId);
+
+                let qtyReturnConversionRate = variantSelectedItem?.conversion_rate*qtyReturn;
+
+                if(qtyReturnConversionRate>maxReturnConversionRate
+                    || qtyReturnConversionRate>inventory
+                    || qtyReturnConversionRate<0){
+                    row.find('td.editable').addClass('bg-danger');
+                    result.isValid=0;
+                    result.message='Số lượng trả lại phải bé hơn số lượng trên đơn và tồn kho hiện tại!';
+                }
+
+                result.data.push({
+                    purchase_detail_id: data.id,
+                    variant_id: variantSelectedId,
+                    qty: qtyReturn
+                });
+            }
+        });
+
+        if(result.isValid && !result.data.length){
+            result.isValid=0;
+            result.message='Vui lòng nhập số liệu cần trả lại!';
+        }
+
+        if(!$('#note').val()){
+            result.isValid=0;
+            result.message='Lý do trả hàng?';
+            $('#note').focus();
+        }
+
+        return result;
+    }
+    function showInfo(){
+        let totalReturnAmount=0,numberProductReturn=0;
+        $('#tblProduct tbody tr').each(function () {
+            let $row = $(this);
+            let purchaseDetail = tblProduct.row($row).data()[0];
+            let variantSelectedId = $row.find('td.editable select').val();
+
+            //gia nhap tinh theo don vi goc
+            let priceBaseUnit=purchaseDetail.price/purchaseDetail.conversion_rate;
+
+            let discountAmountBaseUnit=purchaseDetail.discount_amount/purchaseDetail.conversion_rate;
+            let vatAmountBaseUnit=purchaseDetail.vat_amount/purchaseDetail.conversion_rate;
+
+            $row.find('td.editable').removeClass("has-success");
+
+            let qtyReturn = $row.find('input.qty').val();
+            qtyReturn = qtyReturn ? parseFloat(qtyReturn) : 0;
+
+            if(qtyReturn>0){
+                $row.find('td.editable').addClass("has-success");
+
+                let variants=purchaseDetail.product.variants;
+                let variantSelectedItem=variants.find(v => v.id == variantSelectedId);
+
+                //gia nhap theo don vi moi
+                let priceBaseUnitNew = priceBaseUnit*variantSelectedItem.conversion_rate;
+                let discountBaseUnitNew = discountAmountBaseUnit*variantSelectedItem.conversion_rate;
+                let vatBaseUnitNew = vatAmountBaseUnit*variantSelectedItem.conversion_rate;
+
+                let productReturnAmount=qtyReturn*(priceBaseUnitNew-discountBaseUnitNew+vatBaseUnitNew);
+
+                $row.find('.product-return-amount').html(formatMoney(productReturnAmount));
+                $row.find('.product-vat-amount').html(formatMoney(vatBaseUnitNew));
+
+                $row.find('.product-discount-amount').html(formatMoney(discountBaseUnitNew));
+                if(purchaseDetail.discount_type === '<?=Define::MONEY?>'){
+                    $row.find('.product-discount-type').html(formatMoneyVND(discountBaseUnitNew));//chang so tien discount neu type=money
+                }
+
+                totalReturnAmount+=productReturnAmount;
+                numberProductReturn+=qtyReturn;
+            }
+        });
+        $('.total-price-return').html(formatMoney(totalReturnAmount));
+        $('.total-qty-return').html(numberProductReturn);
+    }
+</script>

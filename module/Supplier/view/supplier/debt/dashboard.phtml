@@ -1,0 +1,232 @@
+<?php
+use Sulde\Service\Common\Define;
+?>
+<style>
+    .small-box{border-radius:10px; margin-bottom:0px; padding-left:5px}
+</style>
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3 class="paid-total">0</h3>
+                                <h5>Công nợ phải trả</h5>
+                                <i class="fas fa-hand-point-right"></i> <small>Mua hàng từ nhà cung cấp</small>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="small-box bg-warning">
+                            <div class="inner">
+                                <h3 class="purchase-return-total">0</h3>
+                                <h5>Công nợ phải thu</h5>
+                                <i class="fas fa-hand-point-right"></i> <small>Hàng hoàn trả nhà cung cấp</small>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="small-box bg-danger">
+                            <div class="inner">
+                                <h3>0</h3>
+                                <h5>Công nợ quá hạn</h5>
+                                <i class="fas fa-hand-point-right"></i> <small>Nợ quá hạn phải thanh toán</small>
+                            </div>
+                            <div class="icon">
+                                <i class="far fa-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="tblAccountPayableSummary" class="display">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th class="number">No.</th>
+                                <th>Nhà cung cấp</th>
+                                <th class="number">Tổng nhập</th>
+                                <th class="number">Trả hàng</th>
+                                <th class="number">Thanh toán</th>
+                                <th class="number">Còn nợ</th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <th></th>
+                                <th class="number">No.</th>
+                                <th>Nhà cung cấp</th>
+                                <th class="number">Tổng nhập</th>
+                                <th class="number">Trả hàng</th>
+                                <th class="number">Thanh toán</th>
+                                <th class="number">Còn nợ</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    tr.overdue {
+        background-color: #f8d7da !important;   /* đỏ nhạt */
+    }
+    tr.overdue:hover {
+        background-color: #f5c6cb !important;   /* đậm hơn khi hover */
+    }
+</style>
+
+<script>
+    let tblAccountPayableSummary;
+    $(document).ready(function () {
+        tblAccountPayableSummary=$('#tblAccountPayableSummary').DataTable({
+            responsive: true,
+            autoWidth: false,
+            paging: true,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: true,
+            order: [[ 6, "desc" ]],
+            stateSave: false,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+                top: ['search', 'pageLength']
+            },
+            language: {
+                searchPlaceholder: ""
+            },
+            rowCallback: function(row, data) {
+                // data[4] = cột "Trạng thái"
+                /*if (data[4].includes('Quá hạn')) {
+                    row.classList.add('overdue');
+                }*/
+                // row.classList.add('overdue');
+            },
+            columnDefs: [
+                {
+                    name:'rowData',
+                    targets: 0,
+                    visible: false
+                },{
+                    name: 'no',
+                    targets: 1,
+                    width: 50,
+                    className: 'min-desktop'
+                },{
+                    responsivePriority: 1,
+                    name: 'name',
+                    targets: 2,
+                    className: 'title',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let data=rowData[0];
+                        let name='<a href="<?=$this->url('supplier-debt',['action'=>'detail'])?>/'+data.public_id+'" class="title">'+data.supplier_name+'</a>';
+                        $(td).html(name);
+                    }
+                },{
+                    name: 'purchase_total',
+                    targets: 3,
+                    width: 200,
+                    className:'price text-success min-tablet',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(formatMoney(Math.abs(cellData)));
+                    }
+                },{
+                    name: 'purchase_return_total',
+                    targets: 4,
+                    width: 200,
+                    className:'title text-red min-desktop',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(formatMoney(Math.abs(cellData)));
+                    }
+                },{
+                    name: 'purchase_payment_total',
+                    targets: 5,
+                    width: 200,
+                    className:'price text-info min-desktop',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(formatMoney(Math.abs(cellData)));
+                    }
+                },{
+                    name: 'purchase_paid_total',
+                    targets: 6,
+                    width: 250,
+                    className: 'min-tablet',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        (cellData<0)?$(td).addClass('title text-red'):$(td).addClass('price');
+                        $(td).html(formatMoney(Math.abs(cellData)));
+                    }
+                }
+            ],
+            ajax: {
+                url: '<?=$this->url('supplier-debt',['action'=>'dashboard'])?>',
+                type: 'POST',
+                beforeSend: function(){
+                    $('#tblProduct > tbody').html(
+                        '<tr class="odd">' +
+                        '<td valign="top" colspan="7" style="font-size: 9pt" class="dataTables_empty">Đang tải dữ liệu&hellip;</td>' +
+                        '</tr>'
+                    );
+                },
+                dataSrc: function (response) {
+                    let data=[];
+                    let i=1;
+                    let purchaseTotal=0,receivablesTotal=0;
+                    $.each( response.data, function( key, value ) {
+                        console.log(value);
+                        let dataItem=[];
+                        let supplierPurchaseTotal=(value?.<?=Define::PURCHASE_CODE?>)?value?.purchase:0;
+                        let supplierPurchaseReturnTotal=(value?.<?=Define::PURCHASE_RETURN_CODE?>)?value?.<?=Define::PURCHASE_RETURN_CODE?>:0;
+                        let supplierPurchasePaymentTotal=(value?.<?=Define::PAYMENTS_CODE?>)?value?.<?=Define::PAYMENTS_CODE?>:0;
+
+                        let supplierPaidTotal=supplierPurchaseTotal-Math.abs(supplierPurchaseReturnTotal)-Math.abs(supplierPurchasePaymentTotal);
+
+                        dataItem.push(value);
+                        dataItem.push(i++);
+                        dataItem.push(value.supplier_name)
+                        dataItem.push(supplierPurchaseTotal)
+                        dataItem.push(supplierPurchaseReturnTotal);
+                        dataItem.push(supplierPurchasePaymentTotal);
+                        dataItem.push(supplierPaidTotal);
+                        data.push(dataItem);
+                        // console.log(supplierPaidTotal);
+                        purchaseTotal+=supplierPaidTotal;
+                        if(supplierPaidTotal<0)
+                            receivablesTotal+=Math.abs(supplierPaidTotal);
+                    });
+
+                    if(purchaseTotal<0)purchaseTotal=0;
+
+                    $('.paid-total').html(formatMoney(purchaseTotal));
+                    $('.purchase-return-total').html(formatMoney(receivablesTotal));
+                    return data;
+                }
+            }
+        }).on('click', 'tbody tr', (e) => {
+            let classList = e.currentTarget.classList;
+
+            if (classList.contains('tr-selected')) {
+                classList.remove('tr-selected');
+            }
+            else {
+                tblAccountPayableSummary.rows('.tr-selected').nodes().each((row) => row.classList.remove('tr-selected'));
+                classList.add('tr-selected');
+            }
+        });
+    });
+</script>

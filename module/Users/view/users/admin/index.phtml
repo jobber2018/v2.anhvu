@@ -1,0 +1,157 @@
+<?php
+$title = "User list";
+$this->headTitle($title);
+
+use Zend\Mvc\Plugin\FlashMessenger\FlashMessenger; ?>
+
+<!-- START BREADCRUMB -->
+<ul class="breadcrumb">
+    <li><a href="<?=$this->url('admin-dashboard')?>">Home</a></li>
+    <li class="active">User list</li>
+</ul>
+<!-- END BREADCRUMB -->
+<div class="page-title">
+    <h3><span class="fa fa-arrow-circle-o-left"></span> <?=$title?></h3>
+</div>
+<!-- PAGE CONTENT WRAPPER -->
+<div class="page-content-wrap">
+    <div class="row">
+        <div class="col-md-12">
+            <?php
+            if($this->flashMessenger()->render(FlashMessenger::NAMESPACE_SUCCESS)){
+                ?>
+                <div class="alert alert-success" role="alert">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <?=$this->flashMessenger()->render(FlashMessenger::NAMESPACE_SUCCESS)?>
+                </div>
+                <?php
+            }
+            if($this->flashMessenger()->render(FlashMessenger::NAMESPACE_ERROR)){
+                ?>
+                <div class="alert alert-danger" role="alert">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <?=$this->flashMessenger()->render(FlashMessenger::NAMESPACE_ERROR)?>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table table-hover" id="tblUser">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>No.</th>
+                        <th>Full name</th>
+                        <th>Username</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Role</th>
+                        <th>Last login</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                </table>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script type='text/javascript' src='/joli/js/plugins/icheck/icheck.min.js'></script>
+<script>
+    let tblUser,stt=1;
+    $(document).ready(function () {
+        tblUser =$('#tblUser').DataTable({
+            info:false,
+            paging: true,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: true,
+            processing: true,
+            serverSide: true,
+            stateSave: true,
+            autoWidth: false,
+            // searching:true,
+            order: [[0, 'desc']],
+            language: {
+                searchPlaceholder: "Tìm kiếm mobile, username."
+            },
+            columnDefs: [
+                { name:'id', targets: 0, visible: false},
+                { name: 'no', targets: 1,orderable:false, width: '5%',className: 'dt-body-right'},
+                {
+                    name:'button',
+                    targets: 9,
+                    className:'dt-body-right dt-nowrap',
+                    width: '5%',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let userId=rowData[0].id;
+                        // console.log(userId);
+                        let button='';
+                        button+='<a href="<?=$this->url('user-admin',['action'=>'edit'])?>/'+userId+'" data-toggle="tooltip" data-placement="bottom" title="Edit" type="button" class="btn btn-warning btn-rounded editItem">';
+                        button+='<span class="fa fa-edit"></span>';
+                        button+='</a> ';
+
+                        button+='<a href="<?=$this->url('user-admin',['action'=>'change-password'])?>/'+userId+'" data-toggle="tooltip" data-placement="bottom" title="Đổi mật khẩu" type="button" class="btn btn-warning btn-rounded changePassItem">';
+                        button+='<span class="fa fa-key"></span>';
+                        button+='</a> ';
+
+                        button+='<a href="<?=$this->url('user-admin',['action'=>'privileges'])?>/'+userId+'" data-toggle="tooltip" data-placement="bottom" title="Đặc quyền" type="button" class="btn btn-warning btn-rounded">';
+                        button+='<span class="fa fa-eye"></span>';
+                        button+='</a> ';
+
+                        button+='<a href="<?=$this->url('user-admin',['action'=>'delete'])?>/'+userId+'" data-toggle="tooltip" data-placement="bottom" title="Delete" type="button" class="btn btn-warning btn-rounded deleteItem">';
+                        button+='<span class="fa fa-trash-o"></span>';
+                        button+='</a> ';
+
+                        $(td).html(button);
+                    }
+
+                }
+
+            ],
+            ajax: {
+                url: '<?=$this->url('user-admin')?>',
+                type: 'POST',
+                dataSrc: function (json) {
+                    let data=[];
+                    let i=1;
+                    $.each( json.data, function( key, value ) {
+                        let dataItem=[];
+                        dataItem.push(value);
+                        dataItem.push(stt++);
+                        dataItem.push(value.fullname);
+                        dataItem.push(value.username);
+                        dataItem.push(value.mobile);
+                        dataItem.push(value.email);
+                        dataItem.push(value.status);
+                        dataItem.push(value.role);
+                        dataItem.push(value.last_login);
+                        dataItem.push(value.id);
+
+                        dataItem.push(value.inventory);
+                        data.push(dataItem);
+                    });
+                    return data;
+                }
+            }
+        });
+    }).on('click', 'tbody tr', (e) => {
+        let classList = e.currentTarget.classList;
+
+        if (classList.contains('tr-selected')) {
+            classList.remove('tr-selected');
+        }
+        else {
+            tblUser.rows('.tr-selected').nodes().each((row) => row.classList.remove('tr-selected'));
+            classList.add('tr-selected');
+        }
+    });
+    function validateForm() {
+        $("#btnSearch").attr("disabled", true);
+    }
+</script>

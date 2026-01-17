@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: vnhomestay.com.vn
+Token: 467defeba13b183c2112b1c47ceb21146c7beb29373a6bf6f64b88354aad4495

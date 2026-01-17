@@ -1,0 +1,134 @@
+<?php
+$form = $this->form;
+$form->setAttributes([
+    'enctype'=>'multipart/form-data'
+]);
+$form->prepare();
+?>
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <?=$this->form()->openTag($form)?>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('supplier'));
+                            echo $this->formElement($form->get('supplier'));
+                            echo $this->formElementErrors($form->get('supplier'),['class' => 'error']);
+                            ?>
+                            <div class="debt-ledger-info"></div>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('amount'));
+                            echo $this->formElement($form->get('amount'));
+                            echo $this->formElementErrors($form->get('amount'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?=$this->formLabel($form->get('date'));?>
+                            <div class="input-group datetimepicker" id="datetimepicker" data-target-input="nearest">
+                                <?=$this->formElement($form->get('date'));?>
+                                <div class="input-group-append" data-target="#datetimepicker" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('method'));
+                            echo $this->formElement($form->get('method'));
+                            echo $this->formElementErrors($form->get('method'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('note'));
+                            echo $this->formElement($form->get('note'));
+                            echo $this->formElementErrors($form->get('note'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <!-- Image -->
+                        <div class="form-group">
+                            <label class="control-label">Ảnh chứng từ</label>
+                            <?php
+                            echo $this->formElement($form->get('file'));
+                            echo $this->formElementErrors($form->get('file'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success float-right">
+                    <i class="fa fa-plus"></i>
+                    Tạo phiếu
+                </button>
+            </div>
+            <?=$this->form()->closeTag()?>
+        </div>
+    </div>
+</section>
+<!-- /.content -->
+
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="/vendor/adminlte/plugins/moment/moment.min.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/tempusdominus/css/tempusdominus-bootstrap-4.min.css">
+<script src="/vendor/adminlte/plugins/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<!--File input-->
+<link href="/vendor/adminlte/plugins/kartik/dist/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/vendor/adminlte/plugins/kartik/dist/js/fileinput.min.js"></script>
+<script src="/vendor/adminlte/plugins/kartik/dist/themes/fa5/theme.js" type="text/javascript"></script>
+<script>$.fn.fileinput.defaults.theme = 'fa5';</script>
+
+<script>
+    $( document ).ready(function() {
+        $('.datetimepicker').datetimepicker({format: 'DD/MM/YYYY'});
+        $('.select').select2({theme: 'bootstrap4'}).on("change", function() {
+            debtLedgerInfo();
+        });
+        $("#file").fileinput({showUpload: false, showCaption: false, browseClass: "btn btn-danger", dropZoneEnabled: false,maxFileSize: 10000, allowedFileExtensions: ['jpg', 'png', 'jpeg', 'pdf']});
+        debtLedgerInfo();
+
+        $('#btnSubmit').on('click', function(e){
+            e.preventDefault();
+            let amount=$('#amount').val();
+            if(!amount){
+                $('#amount').focus().addClass('error').attr('title','Số tiền thanh toán không được để trống!').tooltip('show');
+                return;
+            }
+            $("#payment-form").submit();
+        });
+    })
+
+    function debtLedgerInfo(){
+        let $opt = $('.select').find(':selected');
+        let total         = $opt.data('total');
+        let returnTotal   = $opt.data('return-total');
+        let paymentsTotal = $opt.data('payments-total');
+        let accountPayable = $opt.data('account-payable');
+
+        $('.debt-ledger-info').html((accountPayable>0)
+            ?`<span class="right badge badge-danger">Công nợ còn lại: ${formatMoney(accountPayable)}</span>`
+            : accountPayable==0
+                ?'<span class="right badge badge-success">Không có công nợ</span>':
+                `<span class="right badge badge-info">Phải thu từ NCC: ${formatMoney(Math.abs(accountPayable))}</span>`);
+
+        (accountPayable===0)
+            ? $('#btnSubmit').prop('disabled', true)
+            :$('#btnSubmit').prop('disabled', false);
+
+        $('#amount').val(formatMoney(Math.abs(accountPayable)));
+    }
+</script>

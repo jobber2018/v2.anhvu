@@ -1,0 +1,27 @@
+<?php
+use Sulde\Service\Common\Common;
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php
+                        foreach ( $this->privileges as $privilege){
+                            if($privilege['dashboard_display'] == 1){
+                                ?>
+                                <a style="margin-top: 5px;" href="<?=$this->url($privilege['url'],['action'=>$privilege['action']])?>" class="btn btn-default">
+                                    <i class="<?=$privilege['icon']?>" style="font-size: 25pt; padding-top: 5px"></i>
+                                    <p style="padding-top: 5px; margin-bottom: 5px; font-weight: bold"><?=$privilege['name']?></p>
+                                </a>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,288 @@
+<dt class="col-sm-12 pb-3">
+    Địa chỉ
+    <div class="tools float-right">
+        <button class="btn btn-info btn-sm add-address">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+</dt>
+<ul class="list-group">
+<?php
+foreach ($customer->getAddress() as $address) {
+    echo '<li class="list-group-item d-flex align-items-start pr-2">';
+    echo '<div class="flex-fill pr-2">';
+    echo $address->getAddress();
+    $isDefault=($address->getIsDefault()==1)?"Mặc định":"";
+    echo ' <small class="badge badge-info">'.$isDefault.'</small>';
+    echo '</div>';
+    echo '<div class="btn-group">';
+    echo '<button class="btn btn-info btn-sm ml-auto btn-edit-address" data-lat="'.$address->getLat().'" data-lng="'.$address->getLng().'" data-address="'.$address->getAddress().'" data-is-default="'.$address->getIsDefault().'" data-address-id="'.$address->getId().'"><i class="fas fa-edit"></i></button>';
+    echo '<button class="btn btn-danger btn-sm ml-auto btn-trash-address" data-address-id="'.$address->getId().'"><i class="fas fa-trash-alt"></i></button>';
+    echo '</div>';
+    echo '</li>';
+}
+?>
+</ul>
+<div class="modal fade" id="modalAddress" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Địa chỉ</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="customer-map-position" style="width: 100%; height: 300px; border: 1px solid #cccccc"></div>
+                <div class="pt-4">
+                    <input type="hidden" name="addressId" id="addressId" value="0">
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-2 col-md-2">Lat</label>
+                            <div class="col-sm-4 col-md-4">
+                                <input class="form-control" type="text" id="lat" name="lat" value="">
+                            </div>
+                            <label class="col-sm-2 col-md-2">Lng</label>
+                            <div class="col-sm-4 col-md-4">
+                                <input class="form-control" type="text" id="lng" name="lng" value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-2">Địa chỉ</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="text" id="address" name="address" value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-2">Mặc định</label>
+                            <div class="col-sm-10">
+                                <div  class="icheck-primary d-inline ml-2">
+                                    <input type="checkbox" value="" name="isDefault" id="chkIsDefault">
+                                    <label for="chkIsDefault"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Hủy</button>
+                <button type="button" id="btnUpdateAddress" class="btn btn-primary">
+                    Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- iCheck -->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/icheck/icheck-bootstrap.min.css">
+
+<style>
+    .gm-style-iw-chr{display: none !important;}
+    .gm-style-iw-d{overflow: unset!important;}
+    .window-info{padding: 10px;}
+</style>
+<script type="application/javascript">
+    var map, marker,infoWindow;
+
+    let pos = { lat: 0, lng: 0 };
+
+    const content = `
+          <div class="window-info">
+            <span class="text-sm">Kéo để chỉnh vị trí</span>
+            <button class="btn btn-tool" onclick="closeInfo()"><i class="fas fa-times"></i></button>
+          </div>
+        `;
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('customer-map-position'), {
+            center: pos,
+            zoom: 17,
+            disableDefaultUI: true
+        });
+        marker = new google.maps.Marker({
+            position: pos,
+            map: map,
+            draggable: true,
+            animation: google.maps.Animation.DROP
+        });
+        marker.addListener("dragstart", () => {
+            infoWindow.close();
+        });
+        marker.addListener("dragend", () => {
+            infoWindow.open(map, marker);
+            const pos = marker.getPosition();
+            $('#lat').val(pos.lat());
+            $('#lng').val(pos.lng());
+        });
+        infoWindow = new google.maps.InfoWindow({
+            content: content
+        });
+        infoWindow.open(map, marker);
+    }
+    function closeInfo() {
+        infoWindow.close();
+    }
+
+    function focusMarket(lat, lng) {
+        const newPos = { lat: Number(lat), lng: Number(lng) };
+        // Di chuyển map
+        map.panTo(newPos);
+        // Di chuyển marker
+        marker.setPosition(newPos);
+    }
+
+    $( document ).ready(function() {
+        $(document).on('click', '.btn-edit-address', function (e) {
+            // $('.address .nav-link').removeClass('active');
+            // $(this).addClass('active');
+
+            let lat = $(this).data('lat')
+            let lng = $(this).data('lng')
+            let address = $(this).data('address')
+            let addressId = $(this).data('address-id')
+            let isDefault=Number($(this).data('is-default'));
+
+            $('#modalAddress').modal('show').on('shown.bs.modal', function () {
+                $('#lat').val(lat);
+                $('#lng').val(lng);
+                $('#address').val(address);
+                $('#addressId').val(addressId);
+                $('#btnUpdateAddress').data('action','update').text('Cập nhật');
+                let chk=$('#chkIsDefault');
+                (isDefault===1)
+                    ?chk.prop('checked', true).prop('disabled', true)
+                    :chk.prop('checked', false).prop('disabled', false)
+
+                focusMarket(lat, lng);
+            });
+        });
+        $('#lat, #lng').on('change', function() {
+            let lat = $('#lat').val();
+            let lng = $('#lng').val();
+            if(lat && lng)
+                focusMarket(lat, lng);
+        });
+        $('#btnUpdateAddress').on('click',function () {
+            let addressId=$('#addressId').val();
+            let lat = $('#lat').val();
+            let lng = $('#lng').val();
+            let address = $('#address').val();
+            let isDefault=($('#chkIsDefault').is(':checked'))?1:0;
+            let action =$('#btnUpdateAddress').data('action');
+            let data={
+                id:addressId,
+                lat:lat,
+                lng:lng,
+                address:address,
+                is_default:isDefault
+            }
+            let url="<?=$this->url('customer-admin',['action'=>'update-address'])?>";
+            if(action=='add'){
+                url="<?=$this->url('customer-admin',['action'=>'add-address'])?>";
+                data.customer_id=<?=$customer->getId()?>;
+            }
+
+            run_waitMe('#modalAddress')
+            $.ajax({
+                method: "POST",
+                url: url,
+                data: data,
+                headers: {Accept: "application/json; charset=utf-8"}
+            }).done(function (response) {
+                if(response.status) {
+                    Toast.fire({title: response.message, icon: 'success'});
+                    location.reload();
+                }
+                else
+                    Swal.fire({icon: "error",title: "Oops...",text: response.message});
+
+                stop_waitMe('#modalAddress');
+            })
+        })
+
+        $('.add-address').on('click',function () {
+            $('#modalAddress').modal('show').on('shown.bs.modal', function () {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            $('#lat').val(lat);
+                            $('#lng').val(lng);
+                            focusMarket(lat, lng);
+                        },
+                        (error) => {
+                            console.error("Lỗi lấy vị trí:", error.message);
+                            $('#lat').val(0);
+                            $('#lng').val(0);
+                        },
+                        {
+                            enableHighAccuracy: true, // dùng GPS
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    alert("Trình duyệt không hỗ trợ định vị");
+                    $('#lat').val(0);
+                    $('#lng').val(0);
+                }
+                $('#btnUpdateAddress').data('action','add').text('Thêm mới');
+                $('#address').val('');
+                $('#addressId').val(0);
+                $('#chkIsDefault').prop('checked', false).prop('disabled', false)
+            });
+        })
+
+        $('.btn-trash-address').on("click", function() {
+            let btn=$(this);
+            let row = $(this).closest('li');
+            let addressId=$(this).data('address-id');
+
+            Swal.fire({
+                title: "Xoá dữ liệu?",
+                html: `Bạn chắc muốn xoá địa chỉ?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: 'Xoá',
+                cancelButtonText:'Huỷ'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    row.addClass('row-deleting');
+                    btn.prop('disabled', true);
+                    btn.find('i')
+                        .removeClass('fa-trash-alt')
+                        .addClass('fa-spinner fa-spin');
+
+                    if (addressId > 0) {
+                        $.ajax({
+                            method: "POST",
+                            url: "<?=$this->url('customer-admin', ['action' => 'delete-address'])?>",
+                            data: {id: addressId},
+                            headers: {Accept: "application/json; charset=utf-8"}
+                        }).done(function (response) {
+                            if (response.status) {
+                                Toast.fire({title: response.message, icon: 'success'});
+                                row.fadeOut(300, function () {row.remove();});
+                            } else {
+                                Swal.fire({icon: "error", title: "Oops...", text: response.message});
+                                row.removeClass('row-deleting');
+                                btn.find('i').removeClass('fa-spinner fa-spin').addClass('fa-trash-alt')
+                                btn.prop('disabled', false);
+                            }
+                        })
+                    }
+                }
+            });
+        })
+    })
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=<?=$geoKey?>&callback=initMap"></script>

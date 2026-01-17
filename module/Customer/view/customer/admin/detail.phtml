@@ -1,0 +1,278 @@
+<?php
+
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\ConfigManager;
+use Sulde\Service\Common\Define;
+
+$title = "Chi tiết khách hàng";
+$this->headTitle($title);
+
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <?php
+                if(count($this->customer->getZaloApp()->toArray())>0){
+                    foreach ($this->customer->getZaloApp() as $zaloApp) {
+                        ?>
+                        <!-- Widget: user widget style 1 -->
+                        <div class="card card-widget widget-user shadow">
+                            <!-- Add the bg color to the header using any of the bg-* classes -->
+                            <div class="widget-user-header bg-info">
+                                <h3 class="widget-user-username"><?=$zaloApp->getName()?></h3>
+                                <h5 class="widget-user-desc">Thông tin Zalo App</h5>
+                            </div>
+                            <div class="widget-user-image">
+                                <img class="img-circle elevation-2" src="<?=$zaloApp->getAvatar()?>" alt="User Avatar">
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-sm-4 border-right">
+                                        <div class="description-block">
+                                            <h5 class="description-header">Zalo</h5>
+                                            <span class="description-text">
+                                                <a href="https://zalo.me/<?=$zaloApp->getPhone()?>" target="_blank">
+                                                <?=$zaloApp->getPhone()?>
+                                                </a>
+                                            </span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-sm-4 border-right">
+                                        <div class="description-block">
+                                            <h5 class="description-header">Cài App</h5>
+                                            <span class="description-text"><?=Common::formatDate($zaloApp->getCreatedDate())?></span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-sm-4">
+                                        <div class="description-block">
+                                            <h5 class="description-header">Mở App</h5>
+                                            <span class="description-text"><?=Common::formatDate($zaloApp->getAccessDate())?></span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                                <!-- /.row -->
+                            </div>
+                        </div>
+                        <!-- /.widget-user -->
+                        <?php
+                    }
+                }
+                ?>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="user-block">
+                            <img class="img-circle" src="/assets/images/avatar.png">
+                            <span class="username"><?=mb_strtoupper($this->customer->getName())?></span>
+                            <span class="description">
+                                <a href="https://zalo.me/<?=$this->customer->getMobile()?>" target="_blank">
+                                <?=$this->customer->getMobile()?>
+                                </a>
+                            </span>
+                        </div>
+                        <a href="<?=$this->url('customer-admin',['action'=>'edit','id'=>$this->customer->getPublicId()])?>" class="btn btn-info float-right">
+                            Sửa
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Khách hàng</dt>
+                            <dd class="col-sm-8 col-7 highlight text-blue"><?=$this->customer->getName()?></dd>
+                        </dl>
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Liên hệ</dt>
+                            <dd class="col-sm-8 col-7"><?=$this->customer->getOwnerName()?></dd>
+                        </dl>
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Điện thoại</dt>
+                            <dd class="col-sm-8 col-7 highlight">
+                                <a href="https://zalo.me/<?=$this->customer->getMobile()?>" target="_blank">
+                                <?=$this->customer->getMobile()?>
+                                </a>
+                            </dd>
+                        </dl>
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Nhóm</dt>
+                            <dd class="col-sm-8 col-7"><?=$this->customer->getGroup()->getName()?></dd>
+                        </dl>
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Tuyến</dt>
+                            <dd class="col-sm-8 col-7">
+                                <label class="text"><?=$this->customer->getRoute()->getName()?></label><br>
+                                <small class="badge badge-info"><i class="far fa-user"></i> <?=$this->customer->getRoute()->getUser()->getUsername()?></small>
+                                <small class="badge badge-success"><i class="far fa-clock"></i> <?=ConfigManager::getDay($this->customer->getRoute()->getDay())?></small>
+
+                            </dd>
+                        </dl>
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Ghi chú giao hàng</dt>
+                            <dd class="col-sm-8 col-7"><?=$this->customer->getDeliveryNote()?></dd>
+                        </dl>
+                        <dl class="row border-bottom">
+                            <dt class="col-sm-4 col-5">Ghi chú</dt>
+                            <dd class="col-sm-8 col-7"><?=$this->customer->getNote()?></dd>
+                        </dl>
+                        <dl class="row">
+                            <?=$this->partial('customer/partial/address', ['geoKey'=>$this->geoKey,'customer'=>$this->customer]);?>
+                        </dl>
+                        <?php
+                        if($this->customer->getImage()){
+                        ?>
+                        <dl class="row">
+                            <dd class="col-sm-12">
+                                <img style="width: 100%" src="<?=Define::CUSTOMER_IMAGE_PATH.$this->customer->getImage()?>">
+                            </dd>
+                        </dl>
+                        <?php }?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-default">
+                    <div class="card-body">
+                        <div id="highcharts"></div>
+                        <div>Danh đơn tháng hiện tại</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">CRM</h3>
+                    </div>
+                    <div class="card-body pt-1">
+                        <table class="display card-comments" id="tblCrm" style="width: 100%">
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <form action="#" method="post">
+                            <div class="input-group">
+                                <input type="text" name="message" placeholder="Nhập nội dung ..." class="form-control">
+                                <span class="input-group-append">
+                                  <button type="button" class="btn btn-default">
+                                      <i class="fas fa-paper-plane"></i>
+                                  </button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Checkin/Checkout</h3>
+                    </div>
+                    <div class="card-body">
+                        List checkin checkout
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .card-comments{background-color: unset}
+    .card-comments .comment-text{color: unset;}
+    #tblCrm thead{display: none}
+</style>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script id="crm-list-item" type="text/html">
+    <div class="card-comment">
+        <img class="img-circle img-sm" src="/assets/images/avatar.png" alt="User Image">
+        <div class="comment-text">
+             <span class="username">
+             {{created_by}}
+             <span class="text-muted float-right">{{created_date}}</span>
+             </span><!-- /.username -->
+            <i>{{content}}</i>
+        </div>
+    </div>
+</script>
+
+<script>
+    let tblCrm;
+    $( document ).ready(function() {
+        tblCrm=$('#tblCrm').DataTable({
+            responsive:true,
+            select:true,
+            paging: true,
+            pageLength:10,
+            ordering: false,
+            processing: true,
+            serverSide: true,
+            info: false,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+            },
+            columnDefs: [
+                {name: 'content', targets: 0}
+            ],
+            ajax: {
+                url: '<?=$this->url('customer-crm-admin',['action'=>'list'])?>',
+                type: 'POST',
+                data:{customer_id:<?=$this->customer->getId()?>},
+                dataSrc: function (json) {
+                    let data=[];
+                    let template = $('#crm-list-item').html();
+                    $.each( json.data, function( key, crmData ) {
+                        let dataItem=[];
+                        let cellData = Mustache.render(template, crmData);
+                        dataItem.push(cellData);
+                        data.push(dataItem);
+                    });
+                    return data;
+                }
+            }
+        })
+    });
+
+    Highcharts.chart('highcharts', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Doanh thu 6 tháng gần nhất'
+        },
+        xAxis: {
+            categories: ['T6', 'T7', 'T8', 'T9', 'T10', 'T11'],
+            crosshair: true,
+            accessibility: {
+                description: 'Countries'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title:{
+                text: '1000 metric tons (MT)'
+            }
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [
+            {
+                name: '2025',
+                data: [387749, 280000, 129000, 64300, 54000, 34300]
+            },
+            {
+                name: '2024',
+                data: [45321, 140000, 10000, 140500, 19500, 113500]
+            }
+        ]
+    });
+</script>

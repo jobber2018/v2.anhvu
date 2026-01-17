@@ -1,0 +1,235 @@
+<?php
+$form = $this->form;
+//$form->setAttributes(['enctype'=>'multipart/form-data']);
+//$form->setAttributes(['action'=>$this->url('supplier-admin',['action'=>'add'])]);
+$form->prepare();
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <?=$this->form()->openTag($form)?>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?=$this->formLabel($form->get('tax_code'));?>
+                            <div class="input-group">
+                                <?=$this->formElement($form->get('tax_code'));?>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-default btn-tax-code-lookup">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <?=$this->formElementErrors($form->get('tax_code'),['class' => 'error']);?>
+                        </div>
+                    </div>
+                    <div class="col-md-6"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('name'));
+                            echo $this->formElement($form->get('name'));
+                            echo $this->formElementErrors($form->get('name'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('short_name'));
+                            echo $this->formElement($form->get('short_name'));
+                            echo $this->formElementErrors($form->get('short_name'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('address'));
+                            echo $this->formElement($form->get('address'));
+                            echo $this->formElementErrors($form->get('address'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('mobile'));
+                            echo $this->formElement($form->get('mobile'));
+                            echo $this->formElementErrors($form->get('mobile'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('email'));
+                            echo $this->formElement($form->get('email'));
+                            echo $this->formElementErrors($form->get('email'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('contact_person'));
+                            echo $this->formElement($form->get('contact_person'));
+                            echo $this->formElementErrors($form->get('contact_person'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('notes'));
+                            echo $this->formElement($form->get('notes'));
+                            echo $this->formElementErrors($form->get('notes'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" name="btnSubmit"  id="btnSubmit" class="btn btn-success float-right">
+                    <i class="fa fa-plus"></i>
+                    Thêm mới
+                </button>
+            </div>
+            <?=$this->form()->closeTag()?>
+        </div>
+    </div>
+</section>
+<!-- jquery-validation -->
+<script src="/vendor/adminlte/plugins/jquery/jquery-validation/jquery.validate.min.js"></script>
+<script src="/vendor/adminlte/plugins/jquery/jquery-validation/additional-methods.min.js"></script>
+
+<script>
+    $( document ).ready(function() {
+        $('#tax_code').focus();
+        $.validator.setDefaults({
+            submitHandler: function (form) {
+                run_waitMe();
+                $.ajax({
+                    url: $(form).attr('action'),
+                    method: 'POST',
+                    data: $(form).serialize(),
+                    success: function (response) {
+                        if(response.status){
+                            Swal.fire({
+                                icon: "success",
+                                confirmButtonText: "Tiếp tục thêm NCC",
+                                showCancelButton: true,
+                                cancelButtonText: 'Danh sách NCC',
+                                text: 'Đã thêm '+response.supplier.name,
+                                allowOutsideClick: false
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.reload();
+                                }else if(result.isDismissed){
+                                    window.location.href="<?=$this->url('supplier-admin',['action'=>'list'])?>";
+                                }
+                            });
+
+                        }else{
+                            Toast.fire({title: response.message, icon: 'error'});
+                        }
+                        stop_waitMe()
+                    },
+                    error: function (xhr) {
+                        console.log("Error:", xhr);
+                        // xử lý khi lỗi
+                    }
+                });
+
+                return false; // chặn submit thật
+            }
+        });
+        $('#supplier-form').validate({
+            rules: {
+                name: {
+                    required: true
+                },
+                address: {
+                    required: true
+                },
+                mobile: {
+                    required: true,
+                    minlength:10
+                },
+                email:{
+                    email:true
+                }
+            },
+            messages: {
+                name:"Nhập tên nhà cung cấp",
+                address: "Nhập địa chỉ nhà cung cấp",
+                mobile: "Nhập số điện thoại nhà cung cấp",
+                email: "Vui lòng nhập đúng địa chỉ email."
+            },
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+
+        $('#tax_code').on('keydown', function(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault(); // ngăn form submit mặc định
+                $('.btn-tax-code-lookup').click(); // gọi click icon search
+            }
+        });
+
+        $('.btn-tax-code-lookup').on('click', function(e){
+            e.preventDefault();
+            taxCode=$('#tax_code').val();
+            if(!taxCode) {
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Nhập mã số thuế NCC'});
+                return
+            }
+            if(taxCode.length<10) {
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Mã số thuế không đúng định dạng'});
+                return
+            }
+
+            $('#name').removeClass('is-invalid');
+            $('#address').removeClass('is-invalid');
+
+            run_waitMe();
+            var url = "<?=$this->url('supplier-api',['action'=>'tax-code-lookup'])?>";
+            $.ajax({
+                method: "GET",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {tax:taxCode}
+            }).done(function (response) {
+                if(response.status){
+                    $('#name').val(response?.data?.company_name).addClass('is-valid');
+                    $('#address').val(response?.data?.address).addClass('is-valid');
+                    $('#short_name').val(response?.data?.short_name);
+                    Toast.fire({title: 'Vui lòng kiểm tra lại tên, địa chỉ NCC.', icon: 'success'});
+                }
+                else{
+                    Swal.fire({icon: "error", title: "Oops...", text: response.message});
+                }
+                stop_waitMe();
+            })
+        });
+    })
+</script>

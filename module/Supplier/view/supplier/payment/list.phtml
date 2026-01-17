@@ -1,0 +1,141 @@
+<?php
+
+use Sulde\Service\Common\Define;
+?>
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <div class="card-tools">
+                    <a href="<?=$this->url('supplier-payment',['action'=>'add'])?>" class="btn btn-info">
+                        <i class="far fa-credit-card"></i>
+                        Tạo phiếu thanh toán
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="tblSupplier" class="display">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th class="number">No.</th>
+                                <th>Tên nhà cung cấp</th>
+                                <th>Trạng thái</th>
+                                <th>Số tiền</th>
+                                <th>Ghi chú</th>
+                                <th>Ngày chứng từ</th>
+                                <th>Ngày duyệt</th>
+                                <th>Người duyệt</th>
+                                <th>Ngày tạo</th>
+                                <th>Người tạo</th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <th></th>
+                                <th class="number">No.</th>
+                                <th>Tên nhà cung cấp</th>
+                                <th>Trạng thái</th>
+                                <th>Số tiền</th>
+                                <th>Ghi chú</th>
+                                <th>Ngày chứng từ</th>
+                                <th>Ngày duyệt</th>
+                                <th>Người duyệt</th>
+                                <th>Ngày tạo</th>
+                                <th>Người tạo</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- /.content -->
+<script>
+    $( document ).ready(function() {
+        let tblSupplier=$('#tblSupplier').DataTable({
+            responsive:true,
+            select:true,
+            autoWidth: false,
+            paging: true,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: false,
+            processing: true,
+            serverSide: true,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+                top: ['search', 'pageLength']
+            },
+            language: {
+                searchPlaceholder: "Nhà cung cấp, ngày chứng từ, người tạo, người duyệt."
+            },
+            initComplete: function() {
+                $(this.api().table().container()).find('input[type="search"]').attr('autocomplete', 'off');
+            },
+            rowCallback: function(row, data) {
+                //if(data[0].status!='<?php //=Define::STATUS_PAID?>//')
+                //     row.classList.add('overdue');
+            },
+            columnDefs: [
+                { name:'rowData', targets: 0, visible: false},
+                { targets: [1,5,6,7,8,9,10], className: 'min-desktop'},
+                {
+                    responsivePriority:1,
+                    name:'name',
+                    targets: 2,
+                    className: 'title'
+                },{
+                    responsivePriority:1,
+                    name: 'status',
+                    targets: 3,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let statusLable=`<span class="badge bg-warning">${rowData[0].status_label}</span>`;
+                        if(rowData[0].status=='<?=Define::STATUS_PAID?>')
+                            statusLable=`<span class="badge bg-success">${rowData[0].status_label}</span>`;
+                        $(td).html(statusLable);
+                    }
+                },{
+                    responsivePriority:1,
+                    name: 'amount',
+                    targets: 4,
+                    className: 'number price',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(formatMoney(cellData));
+                    }
+                }
+            ],
+            ajax: {
+                url: '<?=$this->url('supplier-payment',['action'=>'list'])?>',
+                type: 'POST',
+                dataSrc: function (json) {
+                    let data=[];
+                    let i=1;
+                    $.each( json.data, function( key, value ) {
+                        let dataItem=[];
+                        let name = '<a href="<?=$this->url('supplier-payment',['action'=>'detail'])?>/'+value.public_id+'">'+value.supplier.name+'</a>'
+                        dataItem.push(value);
+                        dataItem.push(i);
+                        dataItem.push(name);
+                        dataItem.push(value.status_label);
+                        dataItem.push(value.amount);
+                        dataItem.push(value.note);
+                        dataItem.push(value.date);
+                        dataItem.push(value.confirm_date);
+                        dataItem.push(value.confirm_by);
+                        dataItem.push(value.created_date);
+                        dataItem.push(value.created_by);
+                        data.push(dataItem);
+                        i++;
+                    });
+                    return data;
+                }
+            }
+        });
+    })
+</script>

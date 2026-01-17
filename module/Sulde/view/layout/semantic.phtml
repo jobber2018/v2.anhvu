@@ -1,0 +1,51 @@
+<?= $this->doctype() ?>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <?= $this->headTitle('NPP Anh Vũ')->setSeparator(' - ')->setAutoEscape(false) ?>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
+    <?= $this->headMeta()
+        ->appendName('viewport', 'width=device-width, initial-scale=1.0')
+        ->appendHttpEquiv('X-UA-Compatible', 'IE=edge,chrome=1')
+    ?>
+
+    <!-- Site Properties -->
+    <link rel="stylesheet" type="text/css" href="/vendor/semantic/dist/semantic.min.css">
+    <script src="/vendor/semantic/examples/assets/library/jquery.min.js"></script>
+    <script src="/vendor/semantic/dist/semantic.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/vendor/semantic/alerts/dist/semantic-ui-alerts.css">
+    <script type="text/javascript" src="/vendor/semantic/alerts/dist/semantic-ui-alerts.js"></script>
+
+    <link href="/vendor/jquery/waitMe/waitMe.css" rel="stylesheet">
+    <script src="/vendor/jquery/waitMe/waitMe.js"></script>
+
+    <script src="/vendor/semantic/dist/core.js"></script>
+    <script type="text/javascript" src="/js/admin.js"></script>
+    <script type="text/javascript" src="/js/printThis.js"></script>
+    <script type="text/javascript" src="/js/jquery.scannerdetection.js"></script>
+
+    <script src="/js/mustache.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/vendor/semantic/dist/semantic-admin.css">
+</head>
+
+<body id="app-main" class="pushable app-demo_app model-person change-list" data-admin-utc-offset="0">
+<!-- Computer menu and content -->
+<div class="pusher">
+    <div class="full height">
+        <!-- Container -->
+        <div id="app-content" class="ui container" style="margin-left: 0 !important; margin-right: 0 !important; background: #E5E5E5">
+            <?= $this->content ?>
+        </div>
+        <div id="footer"></div>
+        <!-- END Container -->
+    </div>
+</div>
+<style>
+    .title{font-weight: bold}
+</style>
+<script>
+    $( document ).ready(function() {
+    })
+</script>

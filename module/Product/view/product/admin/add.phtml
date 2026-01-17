@@ -1,0 +1,335 @@
+<?php
+
+use Sulde\Service\Common\Define;
+
+$form = $this->form;
+$form->setAttributes([
+    'enctype'=>'multipart/form-data',
+    'action'=>$this->url('product-admin',["action"=>'add'])
+]);
+$form->prepare();
+?>
+<style>
+    .bootstrap-tagsinput{width: 100%}
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <?=$this->form()->openTag($form)?>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin sản phẩm</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3">
+                                    <?=$this->formLabel($form->get('name'))?>
+                                </div>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('name'));
+                                    echo $this->formElementErrors($form->get('name'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-4 col-md-3">
+                                    <?=$this->formLabel($form->get('sku'))?>
+                                </div>
+                                <div class="col-sm-3 col-8 col-md-3">
+                                    <?php
+                                    echo $this->formElement($form->get('sku'));
+                                    echo $this->formElementErrors($form->get('sku'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-4 col-md-3">
+                                    <?=$this->formLabel($form->get('categories'));?>
+                                </div>
+                                <div class="col-sm-3 col-8 col-md-3">
+                                    <?=$this->formElement($form->get('categories'));?>
+                                    <?=$this->formElementErrors($form->get('categories'),['class' => 'error']);?>
+                                </div>
+                                <div class="col-sm-3 col-4 col-md-3">
+                                    <?=$this->formLabel($form->get('unit'));?>
+                                </div>
+                                <div class="col-sm-3 col-8 col-md-3">
+                                    <?=$this->formElement($form->get('unit'));?>
+                                    <?=$this->formElementErrors($form->get('unit'),['class' => 'error']);?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-4 col-md-3">
+                                    <?=$this->formLabel($form->get('norm_min'));?>
+                                </div>
+                                <div class="col-sm-3 col-8 col-md-3">
+                                    <?=$this->formElement($form->get('norm_min'));?>
+                                    <?=$this->formElementErrors($form->get('norm_min'),['class' => 'error']);?>
+                                </div>
+                                <div class="col-sm-3 col-4 col-md-3">
+                                    <?=$this->formLabel($form->get('norm_max'));?>
+                                </div>
+                                <div class="col-sm-3 col-8 col-md-3">
+                                    <?=$this->formElement($form->get('norm_max'));?>
+                                    <?=$this->formElementErrors($form->get('norm_max'),['class' => 'error']);?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-4 col-md-3">
+                                    <?=$this->formLabel($form->get('norm_input'));?>
+                                </div>
+                                <div class="col-sm-3 col-8 col-md-3">
+                                    <?=$this->formElement($form->get('norm_input'));?>
+                                    <?=$this->formElementErrors($form->get('norm_input'),['class' => 'error']);?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3">
+                                    <?=$this->formLabel($form->get('note'));?>
+                                </div>
+                                <div class="col-sm-12 col-md-9">
+                                    <?=$this->formElement($form->get('note'));?>
+                                    <?=$this->formElementErrors($form->get('note'),['class' => 'error']);?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3">
+                                    <?=$this->formLabel($form->get('keyword'));?>
+                                </div>
+                                <div class="col-sm-3 col-md-9">
+                                    <?=$this->formElement($form->get('keyword'));?>
+                                    <?=$this->formElementErrors($form->get('keyword'),['class' => 'error']);?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Thông tin thuế
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-5 col-5"><?=$this->formLabel($form->get('vat_option'))?></div>
+                                <div class="col-md-4 col-4">
+                                    <?=$this->formElement($form->get('vat_option'));?>
+                                </div>
+                                <div class="col-md-3 col-3"><?=$this->formElement($form->get('vat_value'));?></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-5 col-5"><?=$this->formLabel($form->get('import_tax'))?></div>
+                                <div class="col-md-7 col-7"><?=$this->formElement($form->get('import_tax'));?></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-5 col-5"><?=$this->formLabel($form->get('export_tax'))?></div>
+                                <div class="col-md-7 col-7"><?=$this->formElement($form->get('export_tax'));?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span class="fa fa-upload"></span>
+                            Hình đại diện
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formElement($form->get('imageFile'));
+                            echo $this->formElementErrors($form->get('imageFile'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Thuộc tính sản phẩm
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" id="btnAddVariant" class="btn btn-info">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="tblVariant">
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-md-4">Mã vạch</label>
+                                <label class="col-md-3">Quy cách</label>
+                                <label class="col-md-2">Đơn vị</label>
+                                <label class="col-md-2">Quy đổi</label>
+                                <label class="col-md-1"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" name="btnSubmit"  id="btnSubmit" class="btn btn-info float-right">
+                            <i class="fa fa-plus"></i>
+                            Thêm mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?=$this->form()->closeTag()?>
+    </div>
+</section>
+
+<script type="text/html" id="row-template">
+    <div class="form-group" id="row_{{id}}">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control barcode" name="vBarcode[]" data-target="#barcode" autocomplete="off" value="{{barcode}}">
+                    <div class="input-group-append" data-target="#barcode">
+                        <button data-result="vBarcode" class="btn btn-default scan-barcode" type="button">
+                            <i class="fa fa-barcode"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="vName[]" autocomplete="off" value="">
+            </div>
+            <div class="col-md-2">
+                <select name="vUnit[]" class="form-control select" data-live-search="1">
+                    <?php
+                    foreach ($this->unitList as $unit){
+                        echo '<option value="'.$unit->getId().'">'.$unit->getName().'</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="vConversionRate[]" autocomplete="off" value="">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-rounded btn-sm" onclick="deleteRowAttribute('row_{{id}}');">
+                    <span class="fa fa-trash"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</script>
+<!--Tags input-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/bootstrap/bootstrap-tagsinput.css">
+<script src="/vendor/adminlte/plugins/bootstrap/bootstrap-tagsinput.min.js"></script>
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+
+<!--File input-->
+<link href="/vendor/adminlte/plugins/kartik/dist/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/vendor/adminlte/plugins/kartik/dist/js/fileinput.min.js"></script>
+<script src="/vendor/adminlte/plugins/kartik/dist/themes/fa5/theme.js" type="text/javascript"></script>
+<script>$.fn.fileinput.defaults.theme = 'fa5';</script>
+
+<script>
+    $( document ).ready(function() {
+        $("#imageFile").fileinput({showUpload: false, showCaption: false, browseClass: "btn btn-danger", dropZoneEnabled: false,maxFileSize: 10000, allowedFileExtensions: ['jpg', 'png', 'jpeg', 'pdf']});
+        $(".select").select2({theme: 'bootstrap4'});
+        $("#vat_option").select2({theme: 'bootstrap4',minimumResultsForSearch: -1}).on('change', function(e) {
+            let selectedValue = $(this).val();
+            if(selectedValue==='other')
+                $('#vat_value').css('display','block').focus().val('0');
+            else
+                $('#vat_value').val(selectedValue).css('display','none');
+        });
+        let index=0;
+        $('#btnAddVariant').on('click', function(e){
+            let rowTemplate = $('#row-template').text();
+            let data={id:index}
+            let row = Mustache.render(rowTemplate,data);
+            index++;
+            $('#tblVariant').append(row);
+            $(".select").select2({theme: 'bootstrap4'});
+            $('.barcode').focus();
+        });
+
+        $("#product-form").on("submit", function(event) {
+            event.preventDefault();
+            // console.log('submit');
+            let productName= $('#name').val();
+            if(!productName){
+                $('#name').focus().addClass('is-invalid').attr('title','Tên sản phẩm không được để trống và không dài quá 100 ký tự!').tooltip('show')
+                return false;
+            }else
+                $('#name').removeClass('is-invalid').removeAttr('data-original-title').removeAttr('title');
+
+            run_waitMe();
+            $.ajax({
+                url: $(this).attr("action"),
+                type: $(this).attr("method"),
+                data: new FormData(this), // lấy toàn bộ dữ liệu (kể cả file),
+                contentType: false,
+                processData: false,
+                headers: {Accept: "application/json; charset=utf-8"}
+            }).done(function(response) {
+                if(response.status==1){
+                    Toast.fire({title: response.message, icon: 'success'});
+                    waitMeMessage('<?=Define::MESSAGE_WINDOW_REDIRECT?>')
+                    window.location.href = "<?=$this->url('product-admin',["action"=>'detail'])?>"+'/'+response.product.public_id;
+                }else{
+                    if(response.data)
+                        showErrorMessageAttribute(response.data.variant,response.data.index,response.message);
+                    else
+                        Toast.fire({title: response.message, icon: 'error'});
+                    stop_waitMe();
+                }
+            });
+        });
+
+        $('#btnSubmit').on('click', function(e){
+            e.preventDefault();
+            $("#product-form").submit();
+        });
+    });
+
+    function showErrorMessageAttribute(variant,position,message){
+        let element = 'input[name="'+variant+'"]';
+        $('#tblVariant .is-invalid').removeClass('is-invalid').removeAttr('data-original-title').removeAttr('title');
+        $(element).each(function(index) {
+            if(position==index)
+                $(this).focus().addClass('is-invalid').attr('title',message).tooltip('show');
+            else
+                $(this).removeClass('is-invalid').attr('title','').tooltip('hide');
+        });
+    }
+
+    function deleteRowAttribute(rowId){
+        $('#'+rowId).fadeOut("slow",function(){
+            $(this).remove();
+        });
+    }
+</script>

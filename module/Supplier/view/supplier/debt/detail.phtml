@@ -1,0 +1,274 @@
+<?php
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\Define;
+?>
+<style>
+    .small-box{border-radius:10px; margin-bottom:0px; padding-left:5px}
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="user-block">
+                            <img class="img-circle" src="/assets/images/avatar.png">
+                            <span class="username"><a href="#"><?=$this->supplier->getShortName()?$this->supplier->getShortName():$this->supplier->getName()?></a></span>
+                            <span class="description"><?=$this->supplier->getAddress()?></span>
+                        </div>
+                        <div class="card-tools">
+                            <a href="<?=$this->url('supplier-payment',['action'=>'add','id'=>$this->supplier->getId()])?>" class="btn btn-info">
+                                <i class="far fa-credit-card"></i>
+                                Tạo phiếu thanh toán
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3 class="paid-total">0</h3>
+                                        <h5>Công nợ phải trả</h5>
+                                        <i class="fas fa-hand-point-right"></i> <small>Mua hàng từ nhà cung cấp</small>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="small-box bg-warning">
+                                    <div class="inner">
+                                        <h3 class="purchase-return-total">0</h3>
+                                        <h5>Công nợ phải thu</h5>
+                                        <i class="fas fa-hand-point-right"></i> <small>Phải thu từ NCC (Trả thàng + Thanh toán > Nhập)</small>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <a href="<?=$this->url('supplier-admin',['action'=>'edit','id'=>$this->supplier->getPublicId()])?>" class="btn btn-success">
+                                <i class="fas fa-edit"></i>
+                                Sửa thông tin NCC
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover dt-responsive nowrap dataTable">
+                            <tr>
+                                <td class="title">Tên NCC</td>
+                                <td class="highlight text-blue"><?=$this->supplier->getName()?></td>
+                            </tr>
+                            <tr>
+                                <td class="title">Tên viết tắt</td>
+                                <td class="highlight text-blue"><?=$this->supplier->getShortName()?></td>
+                            </tr>
+                            <tr>
+                                <td class="title">Địa chỉ</td>
+                                <td><?=$this->supplier->getAddress()?></td>
+                            </tr>
+                            <tr>
+                                <td class="title">Điện thoại</td>
+                                <td><?=$this->supplier->getMobile()?></td>
+                            </tr>
+                            <tr>
+                                <td class="title">Người liên hệ</td>
+                                <td><?=$this->supplier->getContactPerson()?></td>
+                            </tr>
+                            <tr>
+                                <td class="title">Mã số thuế</td>
+                                <td><?=$this->supplier->getTaxCode()?></td>
+                            </tr>
+                            <tr>
+                                <td class="title">Ghi chú</td>
+                                <td><?=$this->supplier->getNotes()?></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-pallet"></i>
+                            Nhập hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display tbl-purchase">
+                            <thead>
+                            <tr>
+                                <th class="number">No.</th>
+                                <th>Chứng từ gốc</th>
+                                <th>Ngày chứng từ</th>
+                                <th>Giá trị</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $i=1;
+                            $purchaseTotal=0;
+                            foreach ($this->supplier->getDebtLedger() as $debtLadger) {
+                                if($debtLadger->getReferenceType()==Define::PURCHASE_CODE){
+                                    echo '<tr>';
+                                    echo '<td>'.$i++.'</td>';
+                                    $referenceURL=$this->url('purchase-admin',['action'=>'detail','id'=>$debtLadger->getReferenceId()]);
+                                    echo '<td><a href="'.$referenceURL.'">Chừng từ gốc</a></td>';
+                                    echo '<td>'.Common::formatDateTime($debtLadger->getCreatedDate()).'</td>';
+                                    echo '<td class="price">'.Common::formatMoney($debtLadger->getAmount()).'</td>';
+                                    echo '<td>'.$debtLadger->getNote().'</td>';
+                                    echo '</tr>';
+                                    $purchaseTotal+=$debtLadger->getAmount();
+                                }
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-undo-alt"></i>
+                            Trả hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display tbl-purchase-return">
+                            <thead>
+                            <tr>
+                                <th class="number">No.</th>
+                                <th>Chứng từ gốc</th>
+                                <th>Ngày chứng từ</th>
+                                <th>Giá trị</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $i=1;
+                            $purchaseReturnTotal=0;
+                            foreach ($this->supplier->getDebtLedger() as $debtLadger) {
+                                if($debtLadger->getReferenceType()==Define::PURCHASE_RETURN_CODE){
+                                    echo '<tr>';
+                                    echo '<td>'.$i++.'</td>';
+                                    $referenceURL=$this->url('purchase-return-admin',['action'=>'detail','id'=>$debtLadger->getReferenceId()]);
+                                    echo '<td><a href="'.$referenceURL.'">Chừng từ gốc</a></td>';
+                                    echo '<td>'.Common::formatDate($debtLadger->getApplyDate()).'</td>';
+                                    echo '<td class="title text-red">'.Common::formatMoney(abs($debtLadger->getAmount())).'</td>';
+                                    echo '<td>'.$debtLadger->getNote().'</td>';
+                                    echo '</tr>';
+                                    $purchaseReturnTotal+=$debtLadger->getAmount();
+                                }
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="far fa-credit-card"></i>
+                            Thanh toán
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display tbl-purchase-payments">
+                            <thead>
+                            <tr>
+                                <th class="number">No.</th>
+                                <th nowrap="">Chứng từ gốc</th>
+                                <th>Ngày chứng từ</th>
+                                <th>Giá trị</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $i=1;
+                            $purchasePaymentsTotal=0;
+                            foreach ($this->supplier->getDebtLedger() as $debtLadger) {
+                                if($debtLadger->getReferenceType()==Define::PAYMENTS_CODE){
+                                    echo '<tr>';
+                                    echo '<td>'.$i++.'</td>';
+                                    $referenceURL=$this->url('supplier-payment',['action'=>'detail','id'=>$debtLadger->getReferenceId()]);
+                                    echo '<td><a href="'.$referenceURL.'">Chừng từ gốc</a></td>';
+                                    echo '<td>'.Common::formatDate($debtLadger->getApplyDate()).'</td>';
+                                    echo '<td class="price">'.Common::formatMoney(abs($debtLadger->getAmount())).'</td>';
+                                    echo '<td>'.$debtLadger->getNote().'</td>';
+                                    echo '</tr>';
+                                    $purchasePaymentsTotal+=$debtLadger->getAmount();
+                                }
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<script>
+    let paidTotal=<?=$purchaseTotal+$purchaseReturnTotal+$purchasePaymentsTotal?>;
+    let receivablesTotal=0;
+
+    $( document ).ready(function() {
+        if(paidTotal<0){
+            receivablesTotal=Math.abs(paidTotal);
+            paidTotal=0;
+        }
+        $('.paid-total').html(formatMoney(paidTotal));
+        $('.purchase-return-total').html(formatMoney(receivablesTotal));
+
+
+        $('.tbl-purchase, .tbl-purchase-return, .tbl-purchase-payments').DataTable({
+            paging: true,
+            pageLength:10,
+            ordering: false,
+            info: false,
+            // order: [[ 0, "ASC" ]]
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+            }
+        });
+    })
+</script>

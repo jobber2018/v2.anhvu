@@ -1,0 +1,174 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <div class="btn-group">
+                                <a href="<?=$this->url('product-admin',['action'=>'add'])?>" class="btn btn-info pull-right">
+                                    Thêm mới sản phẩm
+                                </a>
+                                <button type="button" class="btn btn-info dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <div class="dropdown-menu" role="menu">
+                                    <a class="dropdown-item" href="<?=$this->url('product-excel-admin',['action'=>'upload'])?>">Thêm từ Excel</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display" id="tblProduct">
+                            <thead>
+                            <tr>
+                                <th style="border-right: 1px solid #E5E5E5"></th>
+                                <th style="border-right: 1px solid #E5E5E5; text-align: center">No.</th>
+                                <th style="border-right: 1px solid #E5E5E5; text-align: center">Hình ảnh</th>
+                                <th style="border-right: 1px solid #E5E5E5">Tên sản phẩm</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Phân loại</th>
+                                <th style="border-right: 1px solid #E5E5E5;">
+                                    ĐV
+                                    <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Đơn vị tính cơ bản của sản phẩm"> </span>
+                                </th>
+                                <th style="border-right: 1px solid #E5E5E5;">
+                                    Tồn tối thiểu
+                                    <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Số lượng sản phẩm tồn kho nhỏ hơn định mức hệ thống sẽ cảnh bảo"> </span>
+                                </th>
+                                <th style="border-right: 1px solid #E5E5E5;">
+                                    Tồn tối đa
+                                    <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Số lượng sản phẩm tồn kho lớn hơn định mức hệ thống sẽ cảnh bảo"> </span>
+                                </th>
+                                <th style="border-right: 1px solid #E5E5E5;">
+                                    Gợi ý nhập
+                                    <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Số lượng sản phẩm gợi ý khi nhập hàng, tính trên đơn vị cơ bản của sản phẩm"> </span>
+                                </th>
+                                <th style="border-right: 1px solid #E5E5E5;">
+                                    Tồn kho
+                                    <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Số lượng sản phẩm đang có trong kho"> </span>
+                                </th>
+                                <th style="border-right: 1px solid #E5E5E5;">Thuế GTGT (%)</th>
+                                <th style="border-right: 1px solid #E5E5E5; text-align: right;">
+                                    Trạng thái
+                                    <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="ON=Sản phẩm đang được giao dịch, OFF sản phẩm không được giao dịch (Không hiển thị trên báo giá, ứng dụng, gian hàng...)"> </span>
+                                </th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Bootstrap Switch -->
+<script src="/vendor/adminlte/plugins/bootstrap/bootstrap-switch.min.js"></script>
+
+<script>
+    let tblProduct,stt=1;
+    $(document).ready(function () {
+        tblProduct=$('#tblProduct').DataTable({
+            responsive:true,
+            select:true,
+            paging: true,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: false,
+            processing: true,
+            serverSide: true,
+            stateSave: true,
+            autoWidth: false,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+                top: ['search', 'pageLength']
+            },
+            language: {
+                searchPlaceholder: "Tìm kiếm theo tên, mã sản phẩm, phân loại."
+            },
+            initComplete: function() {
+                $(this.api().table().container()).find('input[type="search"]').attr('autocomplete', 'off');
+            },
+            columnDefs: [
+                { targets: [1,4,5,6,7,8], className: 'min-desktop'},
+                { name:'rowData', targets: 0, visible: false},
+                { name: 'no', targets: 1,className: 'dt-body-center'},
+                {
+                    name: 'image', targets: 2, width: 50,className: 'dt-body-center',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        if (cellData) {
+                            $(td).html('<img src="'+cellData+'">');
+                        }
+                    }
+                },{
+                    name: 'name', targets: 3,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let name='<a class="title" href="<?=$this->url('product-admin',['action'=>'detail'])?>/'+rowData[0].public_id+'">'+cellData+'</a>';
+                        if(rowData[0].note)
+                            name+=`<br><small>${rowData[0].note}</small>`;
+                        $(td).html(name);
+                    }
+                },{
+                    name: 'inventory', targets: 9,className: 'highlight',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        (cellData<=0)?$(td).addClass('red-color'):$(td).addClass('blue-color')
+                        $(td).html(cellData);
+                    }
+                },{
+                    name: 'status', targets: 11,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let button='<input type="checkbox" class="lock-unlock" '+(cellData?'checked':'')+' data-bootstrap-switch data-off-color="danger" data-on-color="info">';
+                        // console.log(cellData);
+                        $(td).html(button);
+                        // khởi tạo switch cho input mới render
+                        let bs=$(td).find('[data-bootstrap-switch]').bootstrapSwitch().on('switchChange.bootstrapSwitch', function(event, state) {
+                            run_waitMe();
+                            $.ajax({
+                                type: "POST",
+                                headers: {Accept: "application/json; charset=utf-8"},
+                                url: '<?=$this->url("product-admin",["action"=>"lock-unlock"])?>',
+                                data: {id:rowData[0].id},
+                                success: function(response) {
+                                    if(response.status==1){
+                                        Toast.fire({title: response.message, icon: 'success'});
+                                    }else{
+                                        Toast.fire({title: response.message, icon: 'error'});
+                                        bs.bootstrapSwitch('state', !state, true);
+                                    }
+                                    stop_waitMe();
+                                }
+                            });
+                            // if(!result) $(this).bootstrapSwitch('state', !state, true);
+                        });
+                    }
+                }
+            ],
+            ajax: {
+                url: '<?=$this->url('product-admin',['action'=>'list'])?>',
+                type: 'POST',
+                dataSrc: function (json) {
+                    let data=[];
+                    let i=1;
+                    $.each( json.data, function( key, product ) {
+                        let dataItem=[];
+                        dataItem.push(product);
+                        dataItem.push(i);
+                        dataItem.push(product.default_image);
+                        dataItem.push(product.name);
+                        dataItem.push(product.category.name);
+                        dataItem.push(product.unit.name);
+                        dataItem.push(product.norm_min);
+                        dataItem.push(product.norm_max);
+                        dataItem.push(product.norm_input);
+                        dataItem.push(product.inventory);
+                        dataItem.push(product.vat_value);
+                        dataItem.push(product.status);
+                        data.push(dataItem);
+                        i++;
+                    });
+                    return data;
+                }
+            }
+        });
+    });
+</script>

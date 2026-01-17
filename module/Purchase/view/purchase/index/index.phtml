@@ -1,0 +1,77 @@
+<?php
+use Sulde\Service\Common\Common;
+?>
+<div style="padding-top: 10px" >
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <button id="startBtn">Bắt đầu</button>
+                    <button id="stopBtn" disabled>Ngừng</button>
+                    <div id="transcript"></div>
+                    <table id="itemsTable">
+                        <thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Đơn vị</th><th>Giá</th><th>DB match</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <script>
+                        let mediaRecorder, audioChunks = [];
+
+                        document.getElementById('startBtn').onclick = async () => {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            mediaRecorder = new MediaRecorder(stream);
+                            audioChunks = [];
+                            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                            mediaRecorder.onstop = uploadAudio;
+                            mediaRecorder.start();
+                            document.getElementById('startBtn').disabled = true;
+                            document.getElementById('stopBtn').disabled = false;
+                        };
+
+                        document.getElementById('stopBtn').onclick = () => {
+                            mediaRecorder.stop();
+                            document.getElementById('startBtn').disabled = false;
+                            document.getElementById('stopBtn').disabled = true;
+                        };
+
+                        async function uploadAudio() {
+                            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                            const form = new FormData();
+                            form.append('audio', blob, 'voice.webm');
+
+                            const resp = await fetch('/purchase/upload', { method: 'POST', body: form });
+                            const j = await resp.json();
+                            if (j.error) {
+                                alert('Lỗi: ' + j.error);
+                                return;
+                            }
+                            document.getElementById('transcript').innerText = j.transcript || '';
+                            renderItems(j.items || []);
+                        }
+
+                        function renderItems(items) {
+                            const tbody = document.querySelector('#itemsTable tbody');
+                            tbody.innerHTML = '';
+                            items.forEach(it => {
+                                const row = document.createElement('tr');
+                                const prod = (it.product_name||'') + (it.db && it.db.found ? ` (-> ${it.db.product.name})` : '');
+                                row.innerHTML = `<td>${prod}</td>
+                                 <td>${it.quantity ?? ''}</td>
+                                 <td>${it.unit ?? ''}</td>
+                                 <td>${it.price ?? ''}</td>
+                                 <td>${it.db && it.db.found ? 'Matched' : 'Not found'}</td>`;
+                                tbody.appendChild(row);
+                            });
+                        }
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+    });
+</script>

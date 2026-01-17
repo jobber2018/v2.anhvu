@@ -1,0 +1,1801 @@
+<?php
+
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\Define;
+
+$productFrom=$this->productForm;
+$supplierForm=$this->supplierForm;
+$productFrom->prepare();
+$supplierForm->prepare();
+$supplierForm->setAttributes(['action'=>$this->url('supplier-admin',['action'=>'add'])]);
+?>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-8 col-8" id="product-search">
+                                <div class="input-group">
+                                    <input type="search" class="form-control" placeholder="Nhập mã hoặc tên sản phẩm...">
+                                    <div class="input-group-append">
+                                        <button type="submit" id="btn-search" class="btn btn-default">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Danh sách gợi ý (autocomplete) -->
+                                <ul id="autocomplete-list"
+                                    class="list-group position-absolute w-100"
+                                    style="z-index: 1000; display: none;">
+                                </ul>
+                            </div>
+                            <div class="col-md-4 col-4">
+                                <button id="btnUpdatePurchaseOrder" class="btn btn-info float-right">
+                                    <span class="fa fa-save"></span>
+                                    Cập nhật
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <input type="hidden" value="percent" name="discount-type" id="discount-type">
+                        <table class="display" id="tblProduct" style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>No.</th>
+                                    <th></th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Đơn vị</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th style="text-align: right">Thành tiền</th>
+                                    <th>Thuế GTGT(%)</th>
+                                    <th>Tiền thuế GTGT</th>
+                                    <th>Chiết khấu</th>
+                                    <th>Tiền chiết khấu</th>
+                                    <th>Phải thanh toán</th>
+                                    <th style="width: 20px"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin đơn hàng</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <tr>
+                                <th class="text-right pb-2">
+                                    Tổng tiền hàng:
+                                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="=Giá sản phẩm * Số lượng nhập"> </span>
+                                </th>
+                                <td class="price text-right pr-2 border-bottom pb-2 total-all-product-amount"><?=Common::formatMoney($this->purchase->getTotalOrderAmount())?></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right pb-2 pt-2">
+                                    Chiết khấu
+                                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="=Tổng tiền chiết khấu của sản phẩm + Tiền chiết khấu theo đơn"> </span>
+                                </td>
+                                <td class="price text-right pr-2 border-bottom pb-2 pt-2 total_order_discount"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right pb-2 pt-2">
+                                    Thuế suất:
+                                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="=Tổng tiền thuế của sản phẩm trong đơn hàng (Thuế sản phẩm = Tiền sản phẩm sau chiết khấu * thuế suất)"> </span>:
+                                </td>
+                                <td class="price text-right pr-2 border-bottom pb-2 pt-2 total_order_tax"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-right pb-2 pt-2">
+                                    Tiền hàng phải thanh toán
+                                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="= Tổng tiền hàng - Chiết khấu + Thuế suất"> </span>:
+                                </th>
+                                <td class="price text-right border-bottom pr-2 pb-2 pt-2 pl-lg-4 total-product-payable-amount" style="width: 130px" nowrap=""></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right pb-2 pt-2">
+                                    Phụ phí
+                                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="=Tổng tiền phụ phí nếu có."> </span>:
+                                </td>
+                                <td class="price text-right pr-2 border-bottom pb-2 pt-2 total_additional_fees_amount"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-right pb-2 pt-2">
+                                    <div class="float-left pt-2">
+                                        CK theo đơn
+                                        <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="Sử dụng tổng tiền sản phẩm sau chiết khấu để tính. (VD: tổng tiền hàng sau khi trừ chiết khẩu của sản phẩm là: 10,000,000, nếu giảm giá 10% theo đơn => đơn được giảm thêm 10,000,000*10%)"> </span>:
+                                    </div>
+                                    <div class="float-right">
+                                        <div class="input-group float-right" style="width: 150px">
+                                            <?php
+                                            $discountType = $this->purchase->getDiscountType();
+                                            $discountValue = $this->purchase->getDiscount();
+                                            $discountValue=($discountType==Define::PERCENT)?Common::formatNumber($discountValue):Common::formatMoney($discountValue);
+                                            ?>
+                                            <input type="text" class="form-control text-right order-discount-value amount" id="order-discount-value" name="order-discount-value" value="<?=$discountValue?>">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default" id="order-discount-type" data-type="<?=$discountType?>">
+                                                    <span class="discount-type-money <?=($discountType==Define::PERCENT)?'d-none':''?>">₫</span>
+                                                    <span class="discount-type-percent <?=($discountType==Define::PERCENT)?'':'d-none'?>">%</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="card-footer border-top">
+                        <div class="row">
+                            <label class="col-md-6 col-6">
+                                Phải thanh toán
+                                <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="=Sau chiết khấu + Thuế suất + Phụ phí"> </span>
+                            </label>
+                            <div class="col-md-6 col-6 price text-right text-lg  total_order_payable"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-default supplier-card-search d-none">
+                    <div class="card-body p-2">
+                        <div class="panel-supplier-search" id="supplier-search">
+                            <div class="input-group">
+                                <input type="search" class="form-control" placeholder="Nhập tên NCC...">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-default">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Danh sách gợi ý (autocomplete) -->
+                            <ul id="supplier-autocomplete-list"
+                                class="list-group position-absolute w-100"
+                                style="z-index: 1000; display: none;">
+                            </ul>
+                        </div>
+                        <div class="panel-supplier-info"></div>
+                    </div>
+                </div>
+                <div class="card card-default supplier-card-info">
+                    <div class="card-header" style="display: flex">
+                        <h3 class="card-title col-md-11"><?=$this->purchase->getSupplier()->getName()?></h3>
+                        <div class="card-tools col-md-1">
+                            <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" id="supplier-id" name="supplier-id" value="<?=$this->purchase->getSupplier()->getId()?>">
+                        <div class="supplier-address"><?=$this->purchase->getSupplier()->getAddress()?></div>
+                    </div>
+                </div>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="card-title">Phụ phí</div>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-info modal-additional-fees">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <table class="table tbl-additional-fees" id="tbl-additional-fees" >
+                            <tbody>
+                            <?php
+                            foreach ($this->purchase->getAdditionalFees() as $additionalFees){
+                                $supplierName = ($additionalFees->getSupplier()->getShortName())?$additionalFees->getSupplier()->getShortName():$additionalFees->getSupplier()->getName();
+                                $additionalFeesAmount=Common::formatMoney($additionalFees->getAmount());
+                                echo <<<HTML
+                                        <tr data-name="{$additionalFees->getName()}"
+                                            data-additional-fees-id="{$additionalFees->getId()}"
+                                            data-supplier-id="{$additionalFees->getSupplier()->getId()}"
+                                            data-amount="{$additionalFees->getAmount()}">
+                                            <td style="width: 100%">{$supplierName}</td>
+                                            <td nowrap>{$additionalFees->getName()}</td>
+                                            <td nowrap>{$additionalFeesAmount}</td>
+                                            <td nowrap>
+                                                <button type="button" class="btn btn-danger btn-rounded btn-sm btn-delete-additional-fees">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        HTML;
+
+                            }
+                            ?>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-muted"><i>Nhập phụ phí nếu có của đơn hàng. Phụ phí được sử dụng để tính giá thành sản phẩm!</i></td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <?=$this->partial('purchase/partial/message', ['purchase'=>$this->purchase,'userLogin'=>$this->userLogin]);?>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--Form them san pham-->
+<script type="text/html" id="variant-row-template">
+    <div class="form-group" id="row_{{id}}">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control barcode" name="vBarcode[]" data-target="#barcode" autocomplete="off" value="{{barcode}}">
+                    <div class="input-group-append" data-target="#barcode">
+                        <button data-result="vBarcode" class="btn btn-default scan-barcode" type="button">
+                            <i class="fa fa-barcode"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="vName[]" autocomplete="off" value="">
+            </div>
+            <div class="col-md-2">
+                <select name="vUnit[]" class="form-control select" data-live-search="1">
+                    <?php
+                    foreach ($this->unitList as $unit){
+                        echo '<option value="'.$unit->getId().'">'.$unit->getName().'</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="vConversionRate[]" autocomplete="off" value="">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-rounded btn-sm" onclick="deleteRowVariant('row_{{id}}');">
+                    <span class="fa fa-trash"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</script>
+
+<div class="modal fade" id="modalAddProduct" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm sản phẩm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?=$this->form()->openTag($productFrom)?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-default">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-3 col-md-3">
+                                            <?=$this->formLabel($productFrom->get('name'))?>
+                                        </div>
+                                        <div class="col-sm-9 col-md-9">
+                                            <?php
+                                            echo $this->formElement($productFrom->get('name'));
+                                            echo $this->formElementErrors($productFrom->get('name'),['class' => 'error']);
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-3 col-4 col-md-3">
+                                            <?=$this->formLabel($productFrom->get('categories'));?>
+                                        </div>
+                                        <div class="col-sm-3 col-8 col-md-3">
+                                            <?=$this->formElement($productFrom->get('categories'));?>
+                                            <?=$this->formElementErrors($productFrom->get('categories'),['class' => 'error']);?>
+                                        </div>
+                                        <div class="col-sm-3 col-4 col-md-3">
+                                            <?=$this->formLabel($productFrom->get('unit'));?>
+                                        </div>
+                                        <div class="col-sm-3 col-8 col-md-3">
+                                            <?=$this->formElement($productFrom->get('unit'));?>
+                                            <?=$this->formElementErrors($productFrom->get('unit'),['class' => 'error']);?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-3 col-md-3">
+                                            <?=$this->formLabel($productFrom->get('note'));?>
+                                        </div>
+                                        <div class="col-sm-12 col-md-9">
+                                            <?=$this->formElement($productFrom->get('note'));?>
+                                            <?=$this->formElementErrors($productFrom->get('note'),['class' => 'error']);?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-3 col-md-3">
+                                            <?=$this->formLabel($productFrom->get('keyword'));?>
+                                        </div>
+                                        <div class="col-sm-3 col-md-9">
+                                            <?=$this->formElement($productFrom->get('keyword'));?>
+                                            <?=$this->formElementErrors($productFrom->get('keyword'),['class' => 'error']);?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card card-default">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    Thuộc tính sản phẩm
+                                </h3>
+                                <div class="card-tools">
+                                    <button type="button" id="btnAddVariant" class="btn btn-info">
+                                        <span class="fa fa-plus"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <label class="col-md-4">Mã vạch</label>
+                                        <label class="col-md-3">Quy cách</label>
+                                        <label class="col-md-2">Đơn vị</label>
+                                        <label class="col-md-2">Quy đổi</label>
+                                        <label class="col-md-1"></label>
+                                    </div>
+                                </div>
+                                <div id="tblVariant"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?=$this->form()->closeTag()?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Hủy</button>
+                <button type="button" id="btnSubmitProduct" class="btn btn-primary">
+                    <i class="fa fa-save"></i>
+                    Thêm sản phẩm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalAddSupplier" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm NCC</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <?=$this->form()->openTag($supplierForm)?>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?=$this->formLabel($supplierForm->get('tax_code'));?>
+                            <div class="input-group">
+                                <?=$this->formElement($supplierForm->get('tax_code'));?>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-default btn-tax-code-lookup">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <?=$this->formElementErrors($supplierForm->get('tax_code'),['class' => 'error']);?>
+                        </div>
+                    </div>
+                    <div class="col-md-6"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('name'));
+                            echo $this->formElement($supplierForm->get('name'));
+                            echo $this->formElementErrors($supplierForm->get('name'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('short_name'));
+                            echo $this->formElement($supplierForm->get('short_name'));
+                            echo $this->formElementErrors($supplierForm->get('short_name'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('address'));
+                            echo $this->formElement($supplierForm->get('address'));
+                            echo $this->formElementErrors($supplierForm->get('address'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('mobile'));
+                            echo $this->formElement($supplierForm->get('mobile'));
+                            echo $this->formElementErrors($supplierForm->get('mobile'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('email'));
+                            echo $this->formElement($supplierForm->get('email'));
+                            echo $this->formElementErrors($supplierForm->get('email'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('contact_person'));
+                            echo $this->formElement($supplierForm->get('contact_person'));
+                            echo $this->formElementErrors($supplierForm->get('contact_person'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($supplierForm->get('notes'));
+                            echo $this->formElement($supplierForm->get('notes'));
+                            echo $this->formElementErrors($supplierForm->get('notes'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Hủy</button>
+                <button type="submit" id="btnSubmitSupplier" class="btn btn-primary">
+                    <i class="fa fa-save"></i>
+                    Thêm NCC
+                </button>
+            </div>
+            <?=$this->form()->closeTag()?>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalAddAdditionalFees" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm phụ phí</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label">Tên phụ phí</label>
+                    <div>
+                        <input type="text" name="additional-fees-name" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Số tiền</label>
+                    <div>
+                        <input type="text" name="additional-fees-amount" class="form-control amount">
+                    </div>
+                </div>
+                <div id="supplier-additional-fees">
+                    <div class="input-group">
+                        <input type="hidden" id="supplier-additional-fees-id" value="0">
+                        <input type="search" class="form-control" placeholder="Nhập tên NCC...">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Danh sách gợi ý (autocomplete) -->
+                    <ul id="supplier-autocomplete-additional-fees-list" class="list-group position-absolute w-100" style="z-index: 1000; display: none;">
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Hủy</button>
+                <button type="button" id="btnAddAdditionalFees" class="btn btn-primary">
+                    <i class="fa fa-save"></i>
+                    Thêm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+
+<!--Tags input-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/bootstrap/bootstrap-tagsinput.css">
+<script src="/vendor/adminlte/plugins/bootstrap/bootstrap-tagsinput.min.js"></script>
+
+<!-- jquery-validation -->
+<script src="/vendor/adminlte/plugins/jquery/jquery-validation/jquery.validate.min.js"></script>
+<script src="/vendor/adminlte/plugins/jquery/jquery-validation/additional-methods.min.js"></script>
+
+<!--Datatable fixed column-->
+<script src="/vendor/adminlte/plugins/datatables/2.3.5/js/dataTables.fixedColumns.min.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/datatables/2.3.5/css/fixedColumns.dataTables.css">
+
+<style>
+    #autocomplete-list {
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow:0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+        margin-top: 2px;
+        width: 90%!important;
+    }
+    /* chỉ hiển thị line bên trái khi hover */
+    .autocomplete-item:hover::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 3px;              /* độ rộng line */
+        height: 100%;
+        background: #007bff;     /* màu xanh kiểu AdminLTE */
+        border-radius: 3px;
+    }
+
+    /* KHÔNG đổi background khi hover */
+    .autocomplete-item:hover {
+        cursor: pointer;
+    }
+    table .select2-container{border:1px solid #ced4da; border-radius: 4px}
+    table .select2-container--bootstrap4 .select2-selection{border: unset}
+    .bootstrap-tagsinput{width: 100%!important;}
+    tr.row-deleting {
+        opacity: 0.5;
+        pointer-events: none; /* chặn click toàn row */
+    }
+</style>
+
+<script>
+    let purchaseDetails = <?=json_encode($this->purchaseDetails)?>;
+
+    const searchCustom = function (userConfig = {}) {
+        //default html search box
+        /*
+        <div class="form-group position-relative" id="product_search">
+            <label>Tìm sản phẩm</label>
+            <div class="input-group">
+                <input type="search"
+                       class="form-control"
+                       placeholder="Nhập mã hoặc tên sản phẩm...">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-default">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Danh sách gợi ý (autocomplete) -->
+            <ul id="autocomplete-list"
+                class="list-group position-absolute w-100"
+                style="z-index: 1000; display: none;">
+            </ul>
+        </div>
+        * */
+        // ===========================
+        // DEFAULT CONFIG
+        // ===========================
+        const config = {
+            search:'#product_search',
+            list: "#autocomplete-list",
+            api: "/admin/product/autocomplete?q=",
+            empty_message:'Khoong co san pham',
+            delay: 400,
+            onSelect: null
+        };
+
+        Object.assign(config, userConfig);
+
+        let timer = null;
+
+        // ===========================
+        // INIT
+        // ===========================
+        function init() {
+            bindInputEvent();
+            bindSelectEvent();
+            bindOutsideClickEvent();
+        }
+
+        // ===========================
+        // EVENT: USER INPUT
+        // ===========================
+        function bindInputEvent() {
+            let input = `${config.search} input`;
+            $(input).on("input", function () {
+                clearTimeout(timer);
+
+                const keyword = $(this).val().trim();
+                toggleIcon(true);
+
+                timer = setTimeout(() => {
+                    if (keyword === "") {
+                        hideList();
+                        toggleIcon(false);
+                        return;
+                    }
+                    search(keyword);
+                }, config.delay);
+            });
+
+            $(input).on("keydown", handleKeyboardNavigation);
+        }
+
+        function handleKeyboardNavigation(e) {
+            const items = $(config.list).find(".autocomplete-item");
+            if (!items.length) return;
+
+            let active = items.filter(".active");
+            let index = items.index(active);
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setActiveItem(items, index + 1);
+            }
+
+            else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setActiveItem(items, index - 1);
+            }
+
+            else if (e.key === "Enter") {
+                e.preventDefault();
+                active.click();
+            }
+        }
+
+        function setActiveItem(items, index) {
+            if (index < 0) index = items.length - 1;
+            if (index >= items.length) index = 0;
+
+            items.removeClass("active");
+            const item = items.eq(index).addClass("active")[0];
+
+            item.scrollIntoView({
+                block: "nearest",
+                behavior: "smooth"
+            });
+        }
+
+        // ===========================
+        // EVENT: CLICK ON ITEM
+        // ===========================
+        function bindSelectEvent() {
+            $(document).on("click", `${config.list} .autocomplete-item`, function () {
+                const selectedData = $(this).data('value');
+                $(`${config.search} input`).val(selectedData.name);
+                hideList();
+                if (typeof config.onSelect === "function") {
+                    config.onSelect(selectedData);
+                }
+            });
+        }
+
+        // ===========================
+        // EVENT: CLICK OUTSIDE
+        // ===========================
+        function bindOutsideClickEvent() {
+            $(document).on("click", function (e) {
+                if (!$(e.target).closest(`${config.search} input`).length) {
+                    hideList();
+                }
+            });
+        }
+
+        // ===========================
+        // AJAX SEARCH
+        // ===========================
+        function search(keyword) {
+            $.get(config.api + encodeURIComponent(keyword), function (response) {
+                renderList(response.data || []);
+                toggleIcon(false);
+            });
+        }
+
+        // ===========================
+        // RENDER AUTOCOMPLETE
+        // ===========================
+        function renderList(data) {
+            const box = $(config.list);
+            box.empty();
+
+            if (!data.length) {
+                box.append(`<li class="list-group-item autocomplete-item" data-value='{}'>
+                    ${config.empty_message}
+                </li>`);
+            } else {
+                data.forEach(p => {
+                    box.append(`
+                    <li class="list-group-item autocomplete-item"
+                        data-value='${JSON.stringify(p)}'>
+                        <b>${p.name}</b>
+                    </li>
+                `);
+                });
+            }
+
+            box.show();
+            box.find(".autocomplete-item").first().addClass("active");
+        }
+
+        // ===========================
+        // HELPERS
+        // ===========================
+        function hideList() {
+            $(config.list).hide();
+        }
+
+        function toggleIcon(loading) {
+            // const icon = $(config.icon);
+            const icon = $(`${config.search} .input-group-append button i`);
+            icon.toggleClass("fa-search", !loading)
+                .toggleClass("fa-spinner fa-spin", loading);
+
+            $(`${config.search} input[type="hidden"]`).val(0);
+        }
+
+        // ===========================
+        // PUBLIC API
+        // ===========================
+        return {
+            init
+        };
+    };
+
+    let tblProduct;
+    $(document).ready(() => {
+        $('#product-search').focus();
+
+        let productSearch = searchCustom({
+            search:'#product-search',
+            list: '#autocomplete-list',
+            empty_message:'Không tim thấy sản phẩm phù hợp. Click để thêm sản phẩm!',
+            api:'<?=$this->url('product-admin',['action'=>'autocomplete'])?>?q=',
+            onSelect(product) {
+                $('#product-search input').val('');
+                if (!product || Object.keys(product).length === 0) {
+                    $('#modalAddProduct').modal('show').on('shown.bs.modal', function () {
+                        $('#product-form')[0].reset();
+                        $('#tblVariant').empty();
+                        $('#modalAddProduct').find('select').select2({theme: 'bootstrap4'});
+                        $('#modalAddProduct').find('#name').trigger('focus');
+                    });
+                    return false;
+                }
+                if(productExists(product.id)){
+                    Toast.fire({title: `${product.name} đã có trong đơn hàng.`, icon: 'info'});
+                    return false;
+                }
+
+                addProductToTable(product);
+            }
+        });
+        productSearch.init();
+
+        let supplierSearch = searchCustom({
+            search:'#supplier-search',
+            list: '#supplier-autocomplete-list',
+            api:'<?=$this->url('supplier-admin',['action'=>'autocomplete'])?>?q=',
+            empty_message:'Không tìm thấy NCC, click để thêm mới NCC',
+            onSelect(supplier) {
+                $('#supplier-search input').val('');
+                if (!supplier || Object.keys(supplier).length === 0) {
+                    let modal = $('#modalAddSupplier');
+                    modal.attr('data-mode', 'supplier');
+                    modal.modal('show').on('shown.bs.modal', function () {
+                        $('#supplier-form')[0].reset();
+                        $('#modalAddSupplier').find('#tax_code').trigger('focus');
+                    });
+                    return false;
+                }
+                $('.supplier-card-info .card-title').html(supplier.name);
+                $('.supplier-card-info .supplier-address').html(supplier.address);
+                $('#supplier-id').val(supplier.id);
+
+                $('.supplier-card-search').hide().fadeOut(400);
+                $('.supplier-card-info').removeClass('d-none').fadeIn(400);
+            }
+        });
+        supplierSearch.init();
+
+        let supplierSearchAdditionalFees = searchCustom({
+            search:'#supplier-additional-fees',
+            list: '#supplier-autocomplete-additional-fees-list',
+            api:'<?=$this->url('supplier-admin',['action'=>'autocomplete'])?>?q=',
+            empty_message:'Không tìm thấy NCC, click để thêm mới NCC',
+            onSelect(supplier) {
+                if (!supplier || Object.keys(supplier).length === 0) {
+                    //hide moda add additional
+                    $('#modalAddAdditionalFees').modal('hide');
+
+                    let modalAddSupplier = $('#modalAddSupplier');
+                    modalAddSupplier.attr('data-mode', 'additionalFees');
+                    modalAddSupplier.modal('show').on('shown.bs.modal', function () {
+                        $('#supplier-form')[0].reset();
+                        $('#modalAddSupplier').find('#tax_code').trigger('focus');
+                    });
+
+                    return false;
+                }
+                // $('#supplier-additional-fees-id').val(supplier.id);
+                $('#supplier-additional-fees input[type="hidden"]').val(supplier.id);
+            }
+        });
+        supplierSearchAdditionalFees.init();
+
+        tblProduct=$('#tblProduct').DataTable({
+            responsive: isMobile,
+            fixedColumns: isMobile ? false : {
+                start: 3
+            },
+            select:true,
+            ordering:false,
+            autoWidth:false,
+            paging: false,
+            scrollCollapse: true,
+            scrollX: true,
+            scrollY: '60vh',
+            info: false,
+            language:{
+                emptyTable: "Không có sản phẩm nào trong đơn hàng!"
+            },
+            layout: {
+                // topStart: {
+                //     buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                // },
+                topEnd: null, // Removes the default search input from the top-end
+            },
+            columnDefs:[
+                { targets: 0, visible: false},
+                { targets: 1, width: '30px'},//no
+                { targets: 2, width: '50px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html('<img src="'+cellData+'">');
+                    }
+                },//img
+                { targets: 3, width: 300,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let product=rowData[0];
+                        let content=`<label class="title name">${product.name}</label><br>`
+                        content+=(product.status==='<?=Define::DEFAULT_UN_ACTIVE?>' || product.status===null)?'<span class="badge badge-danger"><?=Define::PRODUCT_TEXT_UN_ACTIVE?></span> ':'';
+                        content+=(product?.purchase_detail_latest?.price)
+                            ?`<span class="badge badge-info" data-toggle="tooltip" data-placement="bottom" title="NCC: ${product.purchase_detail_latest.supplier.name}">
+                         Giá nhập gần đây: ${formatMoney(product.purchase_detail_latest.price)} ${product.purchase_detail_latest.unit_name}
+                         </span>`
+                            :'<span class="badge badge-info">Nhập lần đầu</span>';
+
+                        $(td).html(content);
+                    }
+                },//name
+                { name:'unit',targets: 4, width: 100,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let select = '<select class="form-control select" name="variant">';
+                        $.each( cellData, function( key, variant ) {
+                            let selected = variant?.is_selected ? 'selected' : '';
+                            select+=`<option value="${variant.id}" ${selected}>${variant.unit.name}</option>`;
+                        });
+                        select += '</select>';
+
+                        $(td).html(select);
+
+                        let $select = $(td).find("select");
+                        $select.select2({theme: 'bootstrap4', minimumResultsForSearch: -1});
+                    }
+                },//dv
+                { name:'qty',targets: 5, width: 100,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(`<input type="number" class="form-control qty text-right" name="qty" min="1" max="1000" value="${cellData}">`);
+                    }
+                },
+                { name:'price',targets: 6, width: '140px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(`<input type="text" class="form-control price text-right" name="price" min="0" value="${cellData}">`);
+                    }
+                },
+                { name:'total_price',targets: 7, width: '120px',className:'total-product-amount price'},//thanh tien
+                { name:'vat',targets: 8, width: '150px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(`<input type="number" class="form-control vat text-right" name="vat" min="0" max="100" value="${cellData}">`);
+                    }
+                },{ name:'vat_amount',targets: 9, width: '150px', className: 'product-vat-amount',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(cellData);
+                    }
+                },{ name:'discount',targets: 10, width: '150px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let productDiscountType = $("#discount-type").val();
+                        let discount = '<div class="input-group product-discount">';
+                        discount += `<input type="text" class="form-control discount-value text-right" name="discount-value" value="${cellData}">`;
+                        discount += '<div class="input-group-append">';
+                        discount += `<button class="btn btn-default toggle-type" data-type="${productDiscountType}">`;
+                        discount += (productDiscountType==='<?=Define::MONEY?>')?'<span class="type-money">₫</span>':'<span class="type-money d-none">₫</span>'
+                        discount += (productDiscountType==='<?=Define::PERCENT?>')?'<span class="type-percent">%</span>':'<span class="type-percent d-none">%</span>'
+                        discount += '</button>'
+                        discount += '</div>';
+                        discount += '</div>';
+                        $(td).html(discount);
+                    }
+                }, {
+                    name:'total_amount_after_discount',targets: 11,width: '150px', className: 'product-discount-amount text-bold'
+                },{
+                    name:'product_payable_amount',targets: 12,width: '150px', className: 'product-payable-amount price'
+                },{ targets: 13, width: '50px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html(`<button class="btn button trash" data-detail-id="${cellData}"><i class="fas fa-trash-alt text-danger"></i></button>`);
+                    }
+                }//action
+            ]
+        });
+
+        $("#tblProduct tbody")
+            .on("click", ".trash", function() {
+                let btn=$(this);
+                let row = $(this).closest('tr');
+                let data = tblProduct.row(row).data()[0];
+                if (row.hasClass('row-deleting')) return;
+                row.fadeOut(300, function () {
+                    tblProduct.row(row).remove().draw(false);
+                    showInfoPurchaseOrder();
+                });
+                Toast.fire({html: `Nhấn CẬP NHẬT để xác nhận xoá : <b>${data.name}</b>`, icon: 'info'});
+/*
+                let detailId=$(this).data('detail-id');
+
+                Swal.fire({
+                    title: "Xoá dữ liệu?",
+                    html: `Bạn chắc muốn xoá <b>${data.name}</b> khỏi đơn hàng?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: 'Xoá',
+                    cancelButtonText:'Huỷ'
+                }).then((result) => {
+                    if(result.isConfirmed) {
+                        // 🔒 LOCK ROW
+                        row.addClass('row-deleting');
+                        btn.prop('disabled', true);
+                        // loading
+                        btn.find('i')
+                            .removeClass('fa-trash-alt')
+                            .addClass('fa-spinner fa-spin');
+
+                        /!*if(detailId>0){
+                            $.ajax({
+                                method: "POST",
+                                url: "<?=$this->url('purchase-admin',['action'=>'delete-product'])?>",
+                                data: {id:detailId},
+                                headers: {Accept: "application/json; charset=utf-8"}
+                            }).done(function (response) {
+                                if(response.status){
+                                    Toast.fire({title: response.message, icon: 'success'});
+                                    row.fadeOut(300, function () {
+                                        tblProduct.row(row).remove().draw(false);
+                                        showInfoPurchaseOrder();
+                                    });
+                                }
+                                else{
+                                    Swal.fire({icon: "error",title: "Oops...",text: response.message});
+                                    row.removeClass('row-deleting');
+                                    btn.find('i').removeClass('fa-spinner fa-spin').addClass('fa-trash-alt')
+                                    btn.prop('disabled', false);
+                                }
+                            })
+                        }else{
+                            //row moi them
+                            row.fadeOut(300, function () {
+                                tblProduct.row(row).remove().draw(false);
+                                showInfoPurchaseOrder();
+                            });
+                            Toast.fire({title: `Đã xoá ${data.name}`, icon: 'success'});
+                        }*!/
+                        row.fadeOut(300, function () {
+                            tblProduct.row(row).remove().draw(false);
+                            showInfoPurchaseOrder();
+                        });
+                        Toast.fire({title: `Nhấn cập nhật để xác nhận xoá : ${data.name}`, icon: 'info'});
+                    }
+                });*/
+            })
+            .on("keyup", "input.price", function() {
+                let price = $(this).val();
+                $(this).val(formatMoney(price));
+                showInfoPurchaseOrder();
+            })
+            .on("keyup", ".product-discount input", function() {
+                let discount = getRawMoney($(this).val());
+                const $group = $(this).closest('.product-discount');
+                let discountType = $group.find('button').data('type'); // percent | money
+                if(discountType==='<?=Define::PERCENT?>')
+                    $(this).val(formatNumber(discount));
+                else
+                    $(this).val(formatMoney(discount));
+
+                showInfoPurchaseOrder();
+            })
+            .on("click", ".product-discount button", function() {
+
+                const $btn = $(this);
+                // ⭐ Lấy đúng input trong cùng row / input-group
+                const $group = $btn.closest('.product-discount');
+                const $input = $group.find('.discount-value');
+
+                $input.val(0);
+                $input.focus()
+
+                const $money = $btn.find('.type-money');
+                const $percent = $btn.find('.type-percent');
+                let type = $btn.data('type'); // percent | money
+                if (type === "<?=Define::MONEY?>") {
+                    $money.addClass("d-none");
+                    $percent.removeClass("d-none");
+                    $btn.data('type', '<?=Define::PERCENT?>');
+                    $input.attr('max','100');
+                } else {
+                    // đổi sang tiền
+                    $money.removeClass("d-none");
+                    $percent.addClass("d-none");
+                    $btn.data('type', '<?=Define::MONEY?>');
+                    $input.removeAttr('max');
+                }
+
+                /*let $productDiscountType = $("#discount-type");
+                let type = $productDiscountType.val();
+                $(this).attr('data-type','abc');
+                $('.product-discount input').val(0);
+
+                if (type === "<?=Define::MONEY?>") {
+                    $(".type-money").addClass("d-none");
+                    $(".type-percent").removeClass("d-none");
+                    $productDiscountType.val('percent');
+                    $('.product-discount input').attr('max','100');
+                } else {
+                    // đổi sang tiền
+                    $(".type-money").removeClass("d-none");
+                    $(".type-percent").addClass("d-none");
+                    $productDiscountType.val('money');
+                }*/
+                showInfoPurchaseOrder();
+            })
+            .on("keyup", "input.vat", function() {
+                // let vat = $(this).val();
+                // console.log(vat);
+                // $(this).val(formatNumber(vat));
+                showInfoPurchaseOrder();
+            })
+            .on("click", "input.price", function() {
+                $(this).select();
+            })
+            .on("change", ".select", function() {
+                let $row=$(this).closest('tr');
+                let $qtyEl = $row.find('input.qty');
+                $row.find('input').val(0);
+                $qtyEl.val(1);
+                showInfoPurchaseOrder();
+            })
+            .on("keyup change", "input.qty", function() {
+                showInfoPurchaseOrder();
+            })
+            .on("click", "input.qty", function() {
+                $(this).select();
+            });
+
+        //order discount
+        $('#order-discount-type').on('click',function (e) {
+            let discountOrderType=$(this).data('type');
+
+            if(discountOrderType==='<?=Define::PERCENT?>'){
+                $(this).data('type', '<?=Define::MONEY?>');
+                $('.discount-type-<?=Define::MONEY?>').removeClass('d-none');
+                $('.discount-type-<?=Define::PERCENT?>').addClass('d-none');
+            }else{
+                $(this).data('type', '<?=Define::PERCENT?>');
+                $('.discount-type-<?=Define::MONEY?>').addClass('d-none');
+                $('.discount-type-<?=Define::PERCENT?>').removeClass('d-none');
+            }
+            $('#order-discount-value').focus().val(0);
+            showInfoPurchaseOrder();
+            // console.log('discountOrderType',$(this).data('type'));
+        });
+        $('#order-discount-value').on('keyup change',function (e) {
+            showInfoPurchaseOrder();
+        });
+
+        //add purchse order
+        $('#btnUpdatePurchaseOrder').on('click',function (e) {
+            try {
+                if(tblProduct.rows().data().length === 0){
+                    $('#product-search').focus();
+                    throw 'Chưa có sản phẩm nào trong đơn hàng!';
+                }
+
+                //get products from table
+                let variants=[];
+                $('#tblProduct tbody > tr').each(function(index) {
+                    let $row=$(this);
+                    let price = getRawMoney($row.find('input.price').val());
+                    let qty = intVal($row.find("input.qty").val());
+                    let vat = intVal($row.find("input.vat").val());
+
+                    if(!qty || qty>1000){
+                        $row.find("input.qty").focus().addClass('is-invalid');
+                        throw 'Số lượng sản phẩm không hợp lệ!';
+                    }
+
+                    let product_discount_type = $row.find(".product-discount button").data('type');
+                    let product_discount_value=(product_discount_type === '<?=Define::PERCENT?>')
+                        ? intVal($row.find("input.discount-value").val())
+                        : getRawMoney($row.find("input.discount-value").val());
+
+                    let variantId = $row.find('select.select').val();
+
+                    variants.push({
+                        'variant_id':variantId,
+                        'qty':qty,
+                        'price':price,
+                        'discount':{'value':product_discount_value,'type':product_discount_type},
+                        'vat':vat
+                    });
+                });
+
+                let purchase_order={};
+                purchase_order.id=<?=$this->purchase->getId()?>;
+                purchase_order.variants=variants;
+
+                //get supplier
+                let supplier_id = $('#supplier-id').val();
+                if(supplier_id==0 || supplier_id==='' || supplier_id==null){
+                    $('#supplier-search').focus()
+                    throw 'Vui lòng chọn nhà cung cấp!';
+                }
+                purchase_order.supplier_id=supplier_id;
+
+                //get order discount
+                let order_discount_type=$('#order-discount-type').data('type');
+                let order_discount_value =(order_discount_type==='<?=Define::PERCENT?>')
+                    ? intVal($('#order-discount-value').val())
+                    : getRawMoney($('#order-discount-value').val())
+
+                purchase_order.discount={'type':order_discount_type,'value':order_discount_value}
+
+                //get phu phi
+                purchase_order.additional_fees = getAdditionalFeesData();
+
+                // console.log(purchase_order);
+
+                run_waitMe();
+                let url = '<?=$this->url('purchase-admin',["action"=>'edit'])?>';
+                $.ajax({
+                    method: "POST",
+                    headers: {Accept: "application/json; charset=utf-8"},
+                    url: url,
+                    data: purchase_order,
+                    cache: false,
+                    dataType:'json'
+                }).done(function(res) {
+                    if(res.status===1){
+                        Swal.fire({
+                            icon: "success",
+                            confirmButtonText: "Xem lại đơn",
+                            showCancelButton: true,
+                            cancelButtonText: 'Tiếp tục sửa đơn',
+                            text: res.message,
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href='<?=$this->url('purchase-admin',['action'=>'detail'])?>/'+res.purchaseId;
+                            }
+                        });
+                    }else{
+                        Toast.fire({title: res.message, icon: 'error'});
+                    }
+                    stop_waitMe();
+                });
+            }catch (error) {
+                stop_waitMe();
+                console.log('error:',error);
+                Toast.fire({title: error, icon: 'error'});
+                return false;
+            }
+        })
+
+        // add product
+        let index=0;
+        $('#btnAddVariant').on('click', function(e){
+            let rowTemplate = $('#variant-row-template').text();
+            let data={id:index}
+            let row = Mustache.render(rowTemplate,data);
+            index++;
+            $('#tblVariant').append(row).find('select').select2({theme: 'bootstrap4'});
+            $('.barcode').focus();
+        });
+
+        $('#btnSubmitProduct').on('click', function(e){
+            e.preventDefault();
+            $("#product-form").submit();
+        });
+
+        $("#product-form").on("submit", function(event) {
+            event.preventDefault();
+            let productName= $('#name').val();
+            if(!productName){
+                $('#name').focus().addClass('is-invalid').attr('title','Tên sản phẩm không được để trống và không dài quá 100 ký tự!').tooltip('show')
+                return false;
+            }else
+                $('#name').removeClass('is-invalid').removeAttr('data-original-title').removeAttr('title');
+
+
+            // let type = $(".toggle-type").attr("data-type");
+
+            run_waitMe('.modal-dialog');
+            $.ajax({
+                url: '<?=$this->url('product-admin',["action"=>'add'])?>',
+                type: 'POST',
+                data: new FormData(this), // lấy toàn bộ dữ liệu (kể cả file),
+                contentType: false,
+                processData: false,
+                headers: {Accept: "application/json; charset=utf-8"}
+            }).done(function(response) {
+                if(response.status==1){
+                    Toast.fire({title: response.message, icon: 'success'});
+                    addProductToTable(response.product);
+                    $('#modalAddProduct').modal('hide');
+                }else{
+                    if(response.data)
+                        showErrorMessageProductAddVariant(response.data.variant,response.data.index,response.message);
+                    else
+                        Toast.fire({title: response.message, icon: 'error'});
+                }
+                stop_waitMe('.modal-dialog');
+            });
+        });
+        // end add product
+
+        // add ncc
+        $('#tax_code').on('keydown', function(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault(); // ngăn form submit mặc định
+                $('.btn-tax-code-lookup').click(); // gọi click icon search
+            }
+        });
+        $('.btn-tax-code-lookup').on('click', function(e){
+            e.preventDefault();
+            taxCode=$('#tax_code').val();
+            if(!taxCode) {
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Nhập mã số thuế NCC'});
+                return
+            }
+            if(taxCode.length<10) {
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Mã số thuế không đúng định dạng'});
+                return
+            }
+
+            $('#modalAddSupplier #name').removeClass('is-invalid');
+            $('#address').removeClass('is-invalid');
+
+            run_waitMe();
+            var url = "<?=$this->url('supplier-api',['action'=>'tax-code-lookup'])?>";
+            $.ajax({
+                method: "GET",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {tax:taxCode}
+            }).done(function (response) {
+                if(response.status){
+                    $('#modalAddSupplier #name').val(response?.data?.company_name).addClass('is-valid');
+                    $('#modalAddSupplier #address').val(response?.data?.address).addClass('is-valid');
+                    $('#modalAddSupplier #short_name').val(response?.data?.short_name);
+                    Toast.fire({title: 'Vui lòng kiểm tra lại tên, địa chỉ NCC.', icon: 'success'});
+                }
+                else{
+                    Swal.fire({icon: "error", title: "Oops...", text: response.message});
+                }
+                stop_waitMe();
+            })
+        });
+        $.validator.setDefaults({
+            submitHandler: function (form) {
+                run_waitMe('.modal-dialog');
+                $.ajax({
+                    url: $(form).attr('action'),
+                    method: 'POST',
+                    data: $(form).serialize(),
+                    success: function (response) {
+                        if(response.status){
+                            let modalAddSupplier=$('#modalAddSupplier');
+                            let modalMode = modalAddSupplier.attr('data-mode');
+                            if(modalMode==='supplier'){
+                                $('.supplier-card-info .card-title').html(response.supplier.name);
+                                $('.supplier-card-info .supplier-address').html(response.supplier.address);
+                                $('#supplier-id').val(response.supplier.id);
+
+                                $('.supplier-card-search').hide().fadeOut(400);
+                                $('.supplier-card-info').removeClass('d-none').fadeIn(400);
+                            }else{
+                                $('#modalAddSupplier').modal('hide');
+                                $('#modalAddAdditionalFees').modal('show').on('shown.bs.modal', function () {
+                                    $('#supplier-additional-fees input[type="hidden"]').val(response.supplier.id);
+                                    $('#supplier-additional-fees input[type="search"]').val(response.supplier.name);
+                                });
+                            }
+                            modalAddSupplier.modal('hide');
+
+                        }else{
+                            let errors=response?.message;
+                            $('.error-text').remove();
+                            $('input, select, textarea').removeClass('is-invalid');
+                            try{
+                                $.each(errors, function(field, messages) {
+                                    // Lấy message đầu tiên
+                                    let msg = Object.values(messages)[0];
+
+                                    // Tìm element theo name
+                                    let element = $('[name="' + field + '"]');
+
+                                    // Thêm class lỗi (nếu bạn dùng bootstrap)
+                                    element.addClass('is-invalid');
+
+                                    // Chèn lỗi sau element
+                                    element.after(
+                                        '<div class="error-text" style="color:red;font-size:13px;margin-top:3px;">'
+                                        + msg +
+                                        '</div>'
+                                    );
+                                });
+                            }catch (e) {
+                                Toast.fire({title: response.message, icon: 'error'});
+                            }
+                        }
+                        stop_waitMe('.modal-dialog')
+                    },
+                    error: function (xhr) {
+                        console.log("Error:", xhr);
+                        // xử lý khi lỗi
+                    }
+                });
+
+                return false; // chặn submit thật
+            }
+        });
+
+        $('#supplier-form').validate({
+            rules: {
+                name: {
+                    required: true
+                },
+                address: {
+                    required: true
+                },
+                mobile: {
+                    required: true,
+                    minlength:10
+                },
+                email:{
+                    email:true
+                }
+            },
+            messages: {
+                name:"Nhập tên nhà cung cấp",
+                address: "Nhập địa chỉ nhà cung cấp",
+                mobile: "Nhập số điện thoại nhà cung cấp",
+                email: "Vui lòng nhập đúng địa chỉ email."
+            },
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+        $('.supplier-card-info').on('removed.lte.cardwidget', function () {
+            $('.supplier-card-info .card-title').html('');
+            $('.supplier-card-info .supplier-address').html('');
+            $('#supplier-id').val(0);
+
+            $('.supplier-card-search').removeClass('d-none').hide().fadeIn(400);
+            $('.supplier-card-info').hide().fadeOut(400);
+        });
+        // end add ncc
+
+        // add phu phi
+
+        $('.modal-additional-fees').on('click', function(e){
+            let modalAddAdditionalFees=$('#modalAddAdditionalFees');
+            modalAddAdditionalFees.modal('show').on('shown.bs.modal', function () {
+                $('#supplier-additional-fees input[type="hidden"]').val(0);
+                $('#supplier-additional-fees input[type="search"]').val('');
+                modalAddAdditionalFees.find('input[name="additional-fees-amount"]').val(0)
+                modalAddAdditionalFees.find('input[name="additional-fees-name"]').val('').trigger('focus');
+            });
+        });
+        $('#btnAddAdditionalFees').on('click', function(e){
+            let additionalFeesNameElement=$('input[name="additional-fees-name"]');
+            let additionalFeesAmountElement=$('input[name="additional-fees-amount"]');
+            let additionalSupplierId=$('#supplier-additional-fees input[type="hidden"]');
+            let message;
+
+            $('.error-text').remove();
+            $('#modalAddAdditionalFees input').removeClass('is-invalid');
+
+            if(!additionalFeesNameElement.val()){
+                message='Vui lòng nhập tên chi phí!';
+                additionalFeesNameElement.after('<div class="error-text" style="color:red;font-size:13px;margin-top:3px;">'+message+'</div>');
+                additionalFeesNameElement.addClass('is-invalid').focus();
+                return false;
+            }
+            if(getRawMoney(additionalFeesAmountElement.val())==0){
+                message='Số tiền chi phí!';
+                additionalFeesAmountElement.after('<div class="error-text" style="color:red;font-size:13px;margin-top:3px;">'+message+'</div>');
+                additionalFeesAmountElement.addClass('is-invalid').focus();
+                return false;
+            }
+
+            if(additionalSupplierId.val()==0){
+                message='Vui lòng chọn NCC dịch vụ!';
+                $('#supplier-additional-fees')
+                    .after('<div class="error-text" style="color:red;font-size:13px;margin-top:3px;">'+message+'</div>')
+                    .addClass('is-invalid').focus();
+                return false;
+            }
+
+            // $('#tbl-additional-fees tfoot').html('');
+            $('#tbl-additional-fees tfoot').hide();
+            let tr = $("<tr>")
+                .attr("data-additional-fees-id", 0)
+                .attr("data-name", additionalFeesNameElement.val())
+                .attr("data-amount", getRawMoney(additionalFeesAmountElement.val()))
+                .attr("data-supplier-id", additionalSupplierId.val())
+                .append(`<td style="width: 100%">${$('#supplier-additional-fees input[type="search"]').val()}</td>`)
+                .append(`<td nowrap="">${additionalFeesNameElement.val()}</td>`)
+                .append(`<td nowrap="">${additionalFeesAmountElement.val()}</td>`)
+                .append(`<td nowrap=""><button type="button" class="btn btn-danger btn-rounded btn-sm btn-delete-additional-fees"><i class="fas fa-trash-alt"></i></button></td>`);
+
+            $("#tbl-additional-fees tbody").append(tr);
+            $('#modalAddAdditionalFees').modal('hide');
+            showInfoPurchaseOrder();
+        });
+        $(document).on('click', '.btn-delete-additional-fees', function () {
+            let btn=$(this);
+            let row = $(this).closest('tr');
+            if (row.hasClass('row-deleting')) return;
+            // let additionalFeesId=row.data('additional-fees-id');
+
+            // 🔒 LOCK ROW
+            row.addClass('row-deleting');
+            btn.prop('disabled', true);
+            // loading
+            btn.find('i')
+                .removeClass('fa-trash-alt')
+                .addClass('fa-spinner fa-spin');
+            row.fadeOut(300, function () {
+                row.remove();
+                showInfoPurchaseOrder();
+            });
+            Toast.fire({html: `Nhấn CẬP NHẬT để xác nhận xoá phụ phí: <b>${row.data('name')}</b>`, icon: 'info'});
+
+            if(getAdditionalFeesData().length===0)
+                $('#tbl-additional-fees tfoot').show();
+            /*
+            Swal.fire({
+                title: "Xoá dữ liệu?",
+                html: `Bạn chắc muốn xoá phụ phí <b>${row.data('name')}</b> khỏi đơn hàng?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: 'Xoá',
+                cancelButtonText:'Huỷ'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    // 🔒 LOCK ROW
+                    row.addClass('row-deleting');
+                    btn.prop('disabled', true);
+                    // loading
+                    btn.find('i')
+                        .removeClass('fa-trash-alt')
+                        .addClass('fa-spinner fa-spin');
+
+                    /!*if(additionalFeesId>0){
+                        $.ajax({
+                            method: "POST",
+                            url: "<?=$this->url('purchase-admin',['action'=>'delete-additional-fees'])?>",
+                            data: {id:additionalFeesId},
+                            headers: {Accept: "application/json; charset=utf-8"}
+                        }).done(function (response) {
+                            if(response.status){
+                                Toast.fire({title: response.message, icon: 'success'});
+                                row.fadeOut(300, function () {
+                                    row.remove();
+                                    showInfoPurchaseOrder();
+                                });
+                            }
+                            else{
+                                Swal.fire({icon: "error",title: "Oops...",text: response.message});
+                                row.removeClass('row-deleting');
+                                btn.find('i').removeClass('fa-spinner fa-spin').addClass('fa-trash-alt')
+                                btn.prop('disabled', false);
+                            }
+                        })
+                    }else{
+                        //row moi them
+                        row.fadeOut(300, function () {
+                            row.remove();
+                            showInfoPurchaseOrder();
+                        });
+                        Toast.fire({title: `Đã xoá phụ phí ${row.data('name')}`, icon: 'success'});
+                    }*!/
+                    row.fadeOut(300, function () {
+                        row.remove();
+                        showInfoPurchaseOrder();
+                    });
+                    Toast.fire({title: `Đã xoá phụ phí ${row.data('name')}`, icon: 'success'});
+
+                    if(getAdditionalFeesData().length===0)
+                        $('#tbl-additional-fees tfoot').show();
+                }
+            });
+*/
+
+            // $(this).closest('tr').remove();
+        });
+        // end add phu phi
+
+        //load data to table
+        tblProduct.clear().draw();
+        $.each(purchaseDetails, function(index, purchaseDetail) {
+            let dataItem=[];
+            let product=purchaseDetail.product;
+
+            dataItem.push(product);
+            dataItem.push(index+1);
+            dataItem.push(product.default_image);
+            dataItem.push(product.name);
+
+            let variants=product.variants.map(v => ({
+                ...v,
+                is_selected: v.id === purchaseDetail.variant_id
+            }));
+
+            dataItem.push(variants);
+
+            dataItem.push(intVal(purchaseDetail.qty));
+            dataItem.push(formatMoney(purchaseDetail.price));
+
+            dataItem.push(formatMoney(purchaseDetail.total_amount));//total
+
+            dataItem.push(intVal(purchaseDetail.vat));
+            dataItem.push(formatMoney(purchaseDetail.vat_amount));
+
+            $('#discount-type').val(purchaseDetail.discount_type);
+            let discount=(purchaseDetail.discount_type==='<?=Define::PERCENT?>')?intVal(purchaseDetail.discount):formatMoney(purchaseDetail.discount_amount);
+            dataItem.push(discount);
+
+
+            dataItem.push(formatMoney(purchaseDetail.discount_amount));
+
+            let productPayable = purchaseDetail.qty*(purchaseDetail.price - purchaseDetail.discount_amount + purchaseDetail.vat_amount);
+            dataItem.push(formatMoney(productPayable));
+
+            dataItem.push(purchaseDetail.id);//action
+            tblProduct.row.add(dataItem).draw(true); // Add new data
+            // console.log(purchaseDetail);
+        });
+        showInfoPurchaseOrder();
+    });
+
+    function addProductToTable(product) {
+        let dataItem=[];
+        dataItem.push(product);
+        dataItem.push(1);
+        dataItem.push(product.default_image);
+        dataItem.push(product.name);
+        dataItem.push(product.variants);
+        dataItem.push(1);
+        dataItem.push(0);
+        dataItem.push(0);
+        dataItem.push(intVal(product.vat_value));
+        dataItem.push(0);
+        dataItem.push(0);
+        dataItem.push(0);
+        dataItem.push(0);
+        var newRow = tblProduct.row.add(dataItem).draw(false).node(); // Add new data
+        // Di chuyển row mới lên đầu
+        $(newRow).prependTo(tblProduct.table().body());
+
+        let firstRow = $('#tblProduct > tbody > tr:first');
+        firstRow.find('input.qty').focus();
+        showInfoPurchaseOrder();
+    }
+
+    function showInfoPurchaseOrder(){
+        // console.log('showInfoPurchaseOrder');
+        /**
+         * CÁCH A — (Khuyến nghị theo nguyên tắc kế toán/thuế)
+         * Áp dụng tất cả chiết khấu trước khi tính thuế → thuế sẽ được tính trên giá sau mọi chiết khấu.
+         * Ưu điểm: đúng về mặt giảm thuế (khách hàng chỉ trả thuế trên số tiền thực tế thu), minh bạch với cơ quan thuế.
+         */
+
+        if(tblProduct.rows().data().length===0) return;
+
+        // let productCount=0;
+        let total_product_subtotal=0;//tổng tien hang sau chiết khấu sản phẩm
+        let total_product_vat_amount=0;//tong tin vat cua san pham
+        let total_product_discount_amount = 0;//tong tin chiet khau theo san pham
+        let total_order_before_discount=0;//tong tien truoc khi chiet khau
+
+        $("#tblProduct > tbody > tr").each(function(index){
+            let $row=$(this);
+
+            let productPrice = getRawMoney($row.find('input.price').val());
+            let qty = intVal($row.find("input.qty").val());
+            let vat = intVal($row.find("input.vat").val());
+
+            let product_discount_value,product_discount_amount;
+
+            product_discount_value = $row.find("input.discount-value").val();
+            let product_discount_type = $row.find(".product-discount button").data('type');
+            // console.log(product_discount_type);
+
+            product_discount_amount=(product_discount_type === '<?=Define::PERCENT?>')
+                ?((intVal(product_discount_value)*productPrice)/100) //so tien discount theo %
+                :getRawMoney(product_discount_value);     //so tien discount nhap vao
+
+            let line_net_after_product_discount=productPrice - product_discount_amount; //so tien san pham sau khi - discount
+            total_product_subtotal += line_net_after_product_discount*qty;//tong tien san pham phai tra chua tinh thue
+
+            total_product_discount_amount += product_discount_amount*qty; //tong tien chiet khau san pham
+
+            let product_vat_amount = line_net_after_product_discount*vat/100; //tien thue san pham
+            total_product_vat_amount += product_vat_amount*qty;
+
+            total_order_before_discount += productPrice*qty;
+
+            // productCount++;
+
+            //validate input field
+            $($row.find('input')).each(function(index){
+                if($(this).val()===''
+                    || !$(this).val()
+                    || $(this).val()<$(this).attr('min'))
+                    // || $(this).val()>intVal($(this).attr('max')))
+                    $(this).addClass('is-invalid');
+                else{
+                    $(this).removeClass("is-invalid");
+                }
+            });
+
+            $row.find('.total-product-amount').html(formatMoney(total_order_before_discount));
+            $row.find('.product-discount-amount').html(formatMoney(product_discount_amount));
+
+            $row.find('.product-vat-amount').html(formatMoney(product_vat_amount));
+            let product_payable_amount = (productPrice - product_discount_amount + product_vat_amount)*qty
+            $row.find('.product-payable-amount').html(formatMoney(product_payable_amount));
+
+            $row.find("td:first").html(index+1);
+        });
+
+        let order_discount_value = $('#order-discount-value').val();
+        let order_discount_type=$('#order-discount-type').data('type');
+        let order_discount_amount=0;
+
+        order_discount_amount=(order_discount_type==='<?=Define::PERCENT?>')
+            ? (intVal(order_discount_value)*total_product_subtotal)/100
+            : getRawMoney(order_discount_value)
+
+        //phu phi
+        let additional_fees_amount = 0;
+        $.each(getAdditionalFeesData(),function( key, value ) {
+            additional_fees_amount +=value.amount;
+        })
+        //end phu phi
+
+
+        $('.total-all-product-amount').html(formatMoney(total_order_before_discount));
+
+        let total_order_discount = total_product_discount_amount + order_discount_amount;
+        $('.total_order_discount').html(formatMoney(total_order_discount));
+
+        $('.total_order_tax').html(formatMoney(total_product_vat_amount));
+
+        let totalProductPayableAmount=total_order_before_discount-total_order_discount+total_product_vat_amount;
+        $('.total-product-payable-amount').html(formatMoney(totalProductPayableAmount));
+
+        $('.total_additional_fees_amount').html(formatMoney(additional_fees_amount));
+        $('.total_order_payable').html(formatMoney(totalProductPayableAmount+additional_fees_amount));
+
+    }
+
+    function productExists(productId){
+        let datas = tblProduct.rows().data();
+        let product;
+        for (let i = 0; i < datas.length; i++) {
+            product = datas[i][0];
+            if (product.id == productId)
+                return true;
+        }
+        return false;
+    }
+
+    function deleteRowVariant(rowId){
+        $('#'+rowId).fadeOut("slow",function(){
+            $(this).remove();
+        });
+    }
+
+    function showErrorMessageProductAddVariant(variant,position,message){
+        let element = 'input[name="'+variant+'"]';
+        $('#tblVariant .is-invalid').removeClass('is-invalid').removeAttr('data-original-title').removeAttr('title');
+        $(element).each(function(index) {
+            if(position==index)
+                $(this).focus().addClass('is-invalid').attr('title',message).tooltip('show');
+            else
+                $(this).removeClass('is-invalid').attr('title','').tooltip('hide');
+        });
+    }
+
+    function getAdditionalFeesData(){
+        let datas = [];
+        $('#tbl-additional-fees tbody tr').each(function() {
+            datas.push({
+                name: $(this).data('name'),
+                supplier_id: $(this).data('supplier-id'),
+                additional_fees_id: $(this).data('additional-fees-id'),
+                amount: parseFloat($(this).data('amount'))
+            });
+        });
+        return datas;
+    }
+
+</script>

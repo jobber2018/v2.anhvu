@@ -1,0 +1,909 @@
+<?php
+
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\ConfigManager;
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="user-block">
+                            <img class="img-circle" src="/assets/images/product.png">
+                            <span class="username highlight text-blue"><?=$this->product->getName()?></span>
+                            <span class="description"><?=$this->product->getNote()?$this->product->getNote():'Ngày tạo: '.Common::formatDate($this->product->getCreatedDate())?></span>
+                        </div>
+                        <div class="card-tools">
+                            <button id="btnModalCostPrice" class="btn btn-warning" data-toggle="modal" data-target="#modal-cost">
+                                <i class="fas fa-dollar-sign"></i>
+                                Giá vồn: <span id="product-cost"><?=Common::formatMoney($this->product->getCost())?></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding-top: 0px">
+                        <table class="display" id="tblVariants">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th class="number">No.</th>
+                                <th>Mã vạch</th>
+                                <th>Quy cách</th>
+                                <th>Đơn vị</th>
+                                <th class="number">Quy đổi</th>
+                                <th class="number">Giá bán</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-price" data-toggle="pill" href="#custom-tabs-content-price" role="tab" aria-selected="true">
+                                    Giá bán
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-schedule" data-toggle="pill" href="#custom-tabs-content-schedule" role="tab" aria-selected="false">
+                                    Giá đặc biệt
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-group" data-toggle="pill" href="#custom-tabs-content-group" role="tab" aria-selected="false">
+                                    Giá nhóm
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-tier" data-toggle="pill" href="#custom-tabs-content-tier" role="tab" aria-selected="false">
+                                    Giá theo số lượng
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-content">
+                            <div class="tab-pane fade show active" id="custom-tabs-content-price" role="tabpanel">
+                                <p class="text-muted">Nếu không có giá nào thoả mãn điều kiện "giá đặc biệt, giá nhóm, giá theo số lượng" thì giá mặc định được áp dụng.</p>
+                                <div class="col-md-6 col-12">
+                                    <div class="input-group input-group">
+                                        <input type="text" class="form-control amount" id="txtRetailPrice" value="0">
+                                        <span class="input-group-append">
+                                        <button type="button" class="btn btn-info btn-flat" id="btnSaveRetailPrice">
+                                            <i class="fas fa-save"></i>
+                                            Lưu giá
+                                        </button>
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <p><h5>Lịch sử thay đổi giá</h5></p>
+                                    <table class="display" id="unitPriceTable">
+                                        <thead>
+                                        <tr>
+                                            <th class="price">Giá</th>
+                                            <th>Ngày thay đổi</th>
+                                            <th>Người thay đổi</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-content-schedule" role="tabpanel">
+                                <p class="text-muted">Trong thời gian áp dụng, giá luôn được ưu tiên cao nhất.</p>
+                                <table class="table table-hover" id="scheduleTable">
+                                    <thead>
+                                    <tr>
+                                        <th class="price" nowrap="" style="width: 20%">Giá bán</th>
+                                        <th style="width: 40%">Bắt đầu</th>
+                                        <th style="width: 40%">Kết thúc</th>
+                                        <th nowrap=""></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <hr>
+                                <form id="scheduleForm">
+                                    <div class="form-row">
+                                        <div class="col-md-3">
+                                            <label>Giá bán</label>
+                                            <input id="txtSchedulePrice" class="form-control amount" value="0" />
+                                        </div>
+                                        <div class="col-md-9">
+                                            <label>Thời gian áp dụng</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-clock"></i></span>
+                                                </div>
+                                                <input type="text" class="form-control float-right" id="txtScheduleTime">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-right">
+                                        <button type="button" id="btnAddSchedule" class="btn btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            Thêm giá
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-content-group" role="tabpanel">
+                                <p class="text-muted">Áp dụng với những khách hàng thuộc nhóm bên dưới. (Nếu giá đặc biệt còn hiệu lực thì giá nhóm không được áp dụng)</p>
+                                <table class="table table-hover" id="groupPriceTable">
+                                    <thead>
+                                    <tr>
+                                        <th class="price" nowrap="">Giá bán</th>
+                                        <th style="width: 70%">Nhóm</th>
+                                        <th nowrap=""></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <div id="groupForm" class="border rounded p-3 mt-3">
+                                    <div class="form-row">
+                                        <div class="col-md-4">
+                                            <label>Giá bán</label>
+                                            <input id="txtGrpupPrice" class="form-control amount" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label>Nhóm</label>
+                                            <select id="cboGroupPrice" class="form-control">
+                                                <?php
+                                                foreach ($this->supplierGroups as $group){
+                                                    echo '<option value="'.$group->getId().'">'.$group->getName().'</option>';
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-right">
+                                        <button id="btnAddPriceGroup" class="btn btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            Thêm giá
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-content-tier" role="tabpanel">
+                                <p class="text-muted">Được áp dụng khi giá đặc biệt không còn hiệu lực và khách hàng không thuộc nhóm ưu tiên</p>
+                                <table class="table table-hover" id="tierPriceTable">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 33%" class="price">Giá bán</th>
+                                        <th style="width: 33%">Từ</th>
+                                        <th style="width: 33%">Đến</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+
+                                <!-- Add Tier Form -->
+                                <div id="tierForm" class="border rounded p-3 mt-3">
+                                    <div class="form-row">
+                                        <div class="col-md-4">
+                                            <label>Giá bán</label>
+                                            <input id="txtTierPrice" type="text" class="form-control amount">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Từ (Số lượng)</label>
+                                            <input id="txtTierQtyFrom" type="number" class="form-control">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Đến (Số lượng)</label>
+                                            <input id="txtTierQtyTo" type="number" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <button id="btnAddTierPrice" class="btn btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            Thêm giá
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="modal fade" id="modal-cost" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Điều chỉnh giá vốn</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <label class="col-md-3 col-6">Giá vốn hiện tại:</label>
+                    <div class="col-md-3 price col-6 current-cost"><?=Common::formatMoney($this->product->getCost())?></div>
+                    <label class="col-md-3 col-6">Giá vốn trước:</label>
+                    <div class="col-md-3 text-danger col-6 old-cost" style="text-decoration:line-through">
+                        <?=$this->product->getCostOld()?Common::formatMoney($this->product->getCostOld()):'0'?>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-3 col-6">Giá vốn mới:</label>
+                    <div class="col-md-3 col-6">
+                        <input type="text" name="txtCostPrice" id="cost-price" class="form-control amount" value="">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="btnEditCostPrice" type="button" class="btn btn-success">
+                    <i class="fa fa fa-save"></i>
+                    Cập nhật
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- Bootstrap Switch -->
+<script src="/vendor/adminlte/plugins/bootstrap/bootstrap-switch.min.js"></script>
+
+<!-- date-range-picker -->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/daterangepicker/daterangepicker.css">
+<script src="/vendor/adminlte/plugins/moment/moment.min.js"></script>
+<script src="/vendor/adminlte/plugins/daterangepicker/daterangepicker.js"></script>
+
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+
+<?php
+$variantsData=array();
+if($this->product->getVariants()){
+    foreach($this->product->getVariants() as $variantsItem){
+        $variantsData[] = $variantsItem->serialize();
+    }
+}
+?>
+<script>
+    let tblVariants,variantSelected;
+    let variantsData=<?=json_encode($variantsData)?>;
+    let productCost={'current_cost':<?=$this->product->getCost()?>,'old_cost':<?=$this->product->getCostOld()?>};
+    $(document).ready(function () {
+        $('#cboGroupPrice').select2({theme: 'bootstrap4',minimumResultsForSearch: -1});
+
+        let firstRowSelected = 0;
+        tblVariants=$('#tblVariants').DataTable({
+            responsive:true,
+            paging: false,
+            ordering: false,
+            info:false,
+            processing: false,
+            serverSide: false,
+            stateSave: false,
+            searching: false,
+            select: true,
+            columnDefs: [
+                { targets: [1,2,3,6], className: 'min-desktop'},
+                {
+                    name:'rowData',
+                    targets: 0,
+                    visible: false
+                },{
+                    targets: [1],
+                    width: 10
+                },{
+                    targets: [2,4,5],
+                    width: 100
+                },{
+                    name: 'name',
+                    targets: 3,
+                    width: 200,
+                    className: 'font-weight-bold'
+                },{
+                    name: 'price',
+                    targets: [6],
+                    width: 200,
+                    className: 'price',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        if ( cellData <= 0 ) {
+                            $(td).css('color', 'red');
+                        }
+                        let variant = rowData[0];
+                        let effectivePrice=variant.effective_price;
+                        let variantCost=productCost.current_cost*variant.conversion_rate;
+                        let profitPercentage=((effectivePrice-variantCost)/variantCost)*100
+
+                        if(profitPercentage<0)
+                            profitPercentage= '<br><i class="fa fa-arrow-down text-red"> ' +formatNumber(profitPercentage)+'%</i>';
+                        else if(profitPercentage>0)
+                            profitPercentage='<br><span class="fa fa-arrow-up text-blue"> '+formatNumber(profitPercentage)+'%</span>';
+                        else
+                            profitPercentage= '<br><span class="fa fa-minus text-yellow"> ' +formatNumber(profitPercentage)+'%</span>';
+
+                        $(td).html(`${formatMoney(effectivePrice)}<small>${profitPercentage}</small>`);
+                    }
+                },{
+                    name: 'button',
+                    targets: 7,
+                    className: 'dt-nowrap',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let variantsItem=rowData[0];
+                        let button='<input type="checkbox" class="lock-unlock" '+(variantsItem.status?'checked':'')+' data-bootstrap-switch data-off-color="danger">';
+                        $(td).html(button);
+                        let bs=$(td).find('[data-bootstrap-switch]').bootstrapSwitch().on('switchChange.bootstrapSwitch', function(event, state) {
+                            run_waitMe();
+                            $.ajax({
+                                type: "POST",
+                                headers: {Accept: "application/json; charset=utf-8"},
+                                url: '<?=$this->url("product-variant-admin",["action"=>"lock-unlock"])?>',
+                                data: {id:rowData[0].id},
+                                success: function(response) {
+                                    if(response.status==1){
+                                        Toast.fire({title: response.message, icon: 'success'});
+                                    }else{
+                                        Toast.fire({title: response.message, icon: 'error'});
+                                        bs.bootstrapSwitch('state', !state, true);
+                                    }
+                                    stop_waitMe();
+                                }
+                            });
+                        });
+                    }
+                }
+            ]
+        }).on('draw', () => {
+                if (firstRowSelected===1)
+                    tblVariants.row(0).select();
+                firstRowSelected++;
+            })
+            .on('select', function () {
+                let data = tblVariants.row({ selected: true }).data()[0];
+
+                variantSelected = variantsData.find(item => item.id === data.id);
+                let unitPrice=variantSelected.unit_prices.find(item => item.status === 1);
+                let unitPriceValue = (unitPrice?.retail)?formatMoney(unitPrice?.retail):0;
+                //show retail price
+                $('#txtRetailPrice').val(unitPriceValue);
+
+                // console.log(variantSelected.unit_prices);
+                $('#unitPriceTable tbody').empty();
+                $.each(variantSelected.unit_prices, function(index, item) {
+                    createUnitPriceRowTable(item);
+                });
+
+
+                //create data table price schedule
+                let schedulePrices=variantSelected?.schedule_prices;
+                $('#scheduleTable tbody').empty();
+                $.each(schedulePrices, function(index, item) {
+                    createScheduleRowTable(item);
+                });
+
+                //create data table price group
+                let groupPrices=variantSelected?.group_prices;
+                $('#groupPriceTable tbody').empty();
+                $.each(groupPrices, function(index, item) {
+                    createGroupPriceRowTable(item);
+                });
+
+                //create data table price tier
+                let tierPrices=variantSelected?.tier_prices;
+                $('#tierPriceTable tbody').empty();
+                $.each(tierPrices, function(index, item) {
+                    createTierPriceRowTable(item);
+                });
+            });
+
+        loadDataToTblVariants();
+
+        $('#unitPriceTable').DataTable({
+            responsive:true,
+            select:true,
+            paging: true,
+            pageLength:10,
+            ordering: false,
+            info: false,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+            },
+            columnDefs: [
+                { targets: [2], className: 'min-desktop'}
+            ]
+        });
+
+        //config schedule time date ranger picker
+        $('#txtScheduleTime').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 30,
+            locale: {
+                format: 'DD/MM/YYYY hh:mm A'
+            }
+        });
+
+        //click btn add schedule time
+        $('#btnAddSchedule').click(function(){
+            let price=getRawMoney($('#txtSchedulePrice').val());
+            let scheduleTime=$('#txtScheduleTime').val();
+            // let variant = tblVariants.row({ selected: true }).data()[0];
+
+            if(!variantSelected?.id){
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Chọn sản phẩm cần thực hiện!'});
+                return false;
+            }
+
+            $('#txtSchedulePrice').removeClass('is-invalid');
+
+            if(price<=0){
+                $('#txtSchedulePrice').addClass('is-invalid');
+                return false;
+            }
+            $('#txtSchedulePrice').addClass('is-valid');
+
+            let variantId=variantSelected?.id;
+
+            run_waitMe('.card-outline-tabs');
+            let url = '<?=$this->url('product-price-admin',["action"=>'add-schedule-price'])?>';
+            $.ajax({
+                method: "POST",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {id:variantId,'price':price,'schedule':scheduleTime},
+                cache: false,
+                dataType:'json'
+            }).done(function(response) {
+                if(response.status===1){
+                    Toast.fire({title: response.message, icon: 'success'});
+                    //them data to variants data
+                    variantSelected.schedule_prices.push(response.data);
+                    variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                    variantsData.push(variantSelected);
+                    let newRow=createScheduleRowTable(response.data);
+                    newRow.addClass('tr-highlight');
+                    setTimeout(() => {
+                        newRow.removeClass('highlight');
+                    }, 3000);
+                    // clear
+                    $('#txtSchedulePrice').val(0).removeClass('is-valid');
+                    $('#txtScheduleTime').val('');
+                }else{
+                    Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                }
+                stop_waitMe('.card-outline-tabs');
+            });
+        })
+
+        //click delete schedule time
+        $(document).on('click', '.btn-delete-schedule', function(){
+            let row = $(this).closest('tr');
+            let scheduleId = row.data('price-schedule-id');
+            if(!scheduleId) {
+                Toast.fire({title: 'Không tìm thấy dữ liệu cần xoá!', icon: 'error'});
+                return;
+            }
+
+            let text = 'Xoá giá đặc biệt <b>sẽ không thể khôi phục lại</b>. Bạn vẫn muốn tiếp tục.';
+
+            Swal.fire({
+                title: "Xoá dữ liệu?",
+                html: text,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> Xoá giá đặc biệt',
+                cancelButtonText:'<i class="fas fa-ban"></i> Huỷ xoá'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    run_waitMe('.card-outline-tabs');
+                    let url = '<?=$this->url('product-price-admin',["action"=>'delete-schedule-price'])?>';
+                    $.ajax({
+                        method: "POST",
+                        headers: {Accept: "application/json; charset=utf-8"},
+                        url: url,
+                        data: {id:scheduleId},
+                        cache: false,
+                        dataType:'json'
+                    }).done(function(response) {
+                        if(response.status===1){
+                            Toast.fire({title: response.message, icon: 'success'});
+                            variantSelected.schedule_prices= variantSelected.schedule_prices.filter(item => item.id !== scheduleId)
+                            variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                            variantsData.push(variantSelected);
+
+                            row.remove();
+                        }else{
+                            Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                        }
+                        stop_waitMe('.card-outline-tabs');
+                    });
+                }
+            });
+
+        });
+
+        //cap nhat gia ban le
+        $('#btnSaveRetailPrice').click(function(){
+            let retailPrice=formatMoney($('#txtRetailPrice').val());
+            let variantId=variantSelected.id;
+
+            if(!variantId) {
+                Toast.fire({title: 'Không tìm thấy dữ liệu cần cập nhật!', icon: 'error'});
+                return;
+            }
+
+            if(retailPrice === 0) {
+                Toast.fire({title: 'Giá bán không hợp lệ!', icon: 'error'});
+                return;
+            }
+
+            run_waitMe();
+            let url = '<?=$this->url('product-price-admin',["action"=>'retail-price-update'])?>';
+            $.ajax({
+                method: "POST",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {id:variantId,price:retailPrice},
+                cache: false,
+                dataType:'json'
+            }).done(function(response) {
+                if(response.status===1){
+                    Toast.fire({title: response.message, icon: 'success'});
+                    console.log(response.data);
+                    variantSelected.price=response.data;
+                    variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                    variantsData.push(variantSelected);
+                }else{
+                    Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                }
+                stop_waitMe();
+            });
+        })
+
+        //add group price
+        $('#btnAddPriceGroup').click(function(){
+            let price=getRawMoney($('#txtGrpupPrice').val());
+            let groupPriceId=$('#cboGroupPrice').val();
+
+            // let variant = tblVariants.row({ selected: true }).data()[0];
+
+            if(!variantSelected?.id){
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Chọn sản phẩm cần thực hiện!'});
+                return false;
+            }
+
+            $('#txtGrpupPrice').removeClass('is-invalid');
+
+            if(price<=0){
+                $('#txtGrpupPrice').addClass('is-invalid');
+                return false;
+            }
+
+            $('#txtGrpupPrice').addClass('is-valid');
+
+            let variantId=variantSelected?.id;
+
+            run_waitMe('.card-outline-tabs');
+            let url = '<?=$this->url('product-price-admin',["action"=>'add-group-price'])?>';
+            $.ajax({
+                method: "POST",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {id:variantId,'price':price,'group_id':groupPriceId},
+                cache: false,
+                dataType:'json'
+            }).done(function(response) {
+                if(response.status===1){
+                    Toast.fire({title: response.message, icon: 'success'});
+                    //them data to variants data
+                    variantSelected.group_prices.push(response.data);
+                    variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                    variantsData.push(variantSelected);
+
+                    let newRow=createGroupPriceRowTable(response.data);
+                    newRow.addClass('tr-highlight');
+                    setTimeout(() => {
+                        newRow.removeClass('highlight');
+                    }, 3000);
+
+                    // clear
+                    $('#txtGrpupPrice').val(0).removeClass('is-valid');
+                }else{
+                    Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                }
+                stop_waitMe('.card-outline-tabs');
+            });
+        })
+        //click delete group price
+        $(document).on('click', '.btn-delete-group', function(){
+            let row = $(this).closest('tr');
+            let groupPriceId = row.data('group-price-id');
+            if(!groupPriceId) {
+                Toast.fire({title: 'Không tìm thấy dữ liệu cần xoá!', icon: 'error'});
+                return;
+            }
+
+            let text = 'Xoá nhóm giá <b>sẽ không thể khôi phục lại</b>. Bạn vẫn muốn tiếp tục.';
+
+            Swal.fire({
+                title: "Xoá dữ liệu?",
+                html: text,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> Xoá giá',
+                cancelButtonText:'<i class="fas fa-ban"></i> Huỷ xoá'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    run_waitMe('.card-outline-tabs');
+                    let url = '<?=$this->url('product-price-admin',["action"=>'delete-group-price'])?>';
+                    $.ajax({
+                        method: "POST",
+                        headers: {Accept: "application/json; charset=utf-8"},
+                        url: url,
+                        data: {id:groupPriceId},
+                        cache: false,
+                        dataType:'json'
+                    }).done(function(response) {
+                        if(response.status===1){
+                            Toast.fire({title: response.message, icon: 'success'});
+                            variantSelected.group_prices= variantSelected.group_prices.filter(item => item.id !== groupPriceId)
+                            variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                            variantsData.push(variantSelected);
+
+                            row.remove();
+                        }else{
+                            Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                        }
+                        stop_waitMe('.card-outline-tabs');
+                    });
+                }
+            });
+
+        });
+
+        //add tier price
+        $('#btnAddTierPrice').click(function(){
+            let qtyFrom=formatNumber($('#txtTierQtyFrom').val());
+            let qtyTo=formatNumber($('#txtTierQtyTo').val());
+            let price=getRawMoney($('#txtTierPrice').val());
+
+            if(!variantSelected?.id){
+                Swal.fire({icon: "error", title: "Chú ý!", text: 'Chọn sản phẩm cần thực hiện!'});
+                return false;
+            }
+
+            $('#txtTierPrice').removeClass('is-invalid');
+
+            if(price<=0){
+                $('#txtTierPrice').addClass('is-invalid');
+                return false;
+            }
+
+            $('#txtTierPrice').addClass('is-valid');
+
+            let variantId=variantSelected?.id;
+
+            run_waitMe('.card-outline-tabs');
+            let url = '<?=$this->url('product-price-admin',["action"=>'add-tier-price'])?>';
+            $.ajax({
+                method: "POST",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {id:variantId,'price':price,'min_qty':qtyFrom,'max_qty':qtyTo},
+                cache: false,
+                dataType:'json'
+            }).done(function(response) {
+                if(response.status===1){
+                    Toast.fire({title: response.message, icon: 'success'});
+                    //them data to variants data
+                    variantSelected.tier_prices.push(response.data);
+                    variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                    variantsData.push(variantSelected);
+
+                    let newRow=createTierPriceRowTable(response.data);
+                    newRow.addClass('tr-highlight');
+                    setTimeout(() => {
+                        newRow.removeClass('highlight');
+                    }, 3000);
+
+                    // clear
+                    $('#txtTierPrice').val(0).removeClass('is-valid');
+                    $('#txtTierQtyFrom').val(0);
+                    $('#txtTierQtyTo').val(0);
+                }else{
+                    Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                }
+                stop_waitMe('.card-outline-tabs');
+            });
+        })
+        //click delete tier price
+        $(document).on('click', '.btn-delete-tier', function(){
+            let row = $(this).closest('tr');
+            let tierPriceId = row.data('tier-price-id');
+            if(!tierPriceId) {
+                Toast.fire({title: 'Không tìm thấy dữ liệu cần xoá!', icon: 'error'});
+                return;
+            }
+
+            let text = 'Xoá giá theo số lượng <b>sẽ không thể khôi phục lại</b>. Bạn vẫn muốn tiếp tục.';
+
+            Swal.fire({
+                title: "Xoá dữ liệu?",
+                html: text,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> Xoá giá',
+                cancelButtonText:'<i class="fas fa-ban"></i> Huỷ xoá'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    run_waitMe('.card-outline-tabs');
+                    let url = '<?=$this->url('product-price-admin',["action"=>'delete-tier-price'])?>';
+                    $.ajax({
+                        method: "POST",
+                        headers: {Accept: "application/json; charset=utf-8"},
+                        url: url,
+                        data: {id:tierPriceId},
+                        cache: false,
+                        dataType:'json'
+                    }).done(function(response) {
+                        if(response.status===1){
+                            Toast.fire({title: response.message, icon: 'success'});
+                            variantSelected.tier_prices= variantSelected.tier_prices.filter(item => item.id !== tierPriceId)
+                            variantsData = variantsData.filter(item => item.id !== variantSelected.id);
+                            variantsData.push(variantSelected);
+
+                            row.remove();
+                        }else{
+                            Swal.fire({icon: "error", title: "Chú ý!", text: response.message});
+                        }
+                        stop_waitMe('.card-outline-tabs');
+                    });
+                }
+            });
+
+        });
+
+        $('#modal-cost').on('shown.bs.modal', function (e) {
+            $('.current-cost').html(formatMoney(productCost.current_cost));
+            $('.old-cost').html(formatMoney(productCost.old_cost));
+            $('#cost-price').removeClass('is-invalid').removeClass('is-valid').val(0).focus();
+        });
+
+        $('#btnEditCostPrice').click(function(){
+            let cost=getRawMoney($('#cost-price').val());
+            if(!cost){
+                $('#cost-price').addClass('is-invalid').focus();
+                Toast.fire({title: 'Nhập giá vốn mới!', icon: 'error'});
+                return;
+            }
+            $('#cost-price').removeClass('is-invalid').addClass('is-valid');
+
+            run_waitMe('.modal-dialog');
+            let url = '<?=$this->url('product-admin',["action"=>'cost-update'])?>';
+            $.ajax({
+                method: "POST",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: url,
+                data: {id:<?=$this->product->getId()?>,'cost':cost},
+                cache: false,
+                dataType:'json'
+            }).done(function(res) {
+                if(res.status===1){
+                    $('#product-cost').html(formatMoney(cost));
+                    productCost.old_cost=productCost.current_cost;
+                    productCost.current_cost=cost;
+                    $('#modal-cost').modal('hide');
+                }else{
+                    Toast.fire({title: res.message, icon: 'error'});
+                }
+                stop_waitMe('.modal-dialog');
+            });
+        })
+    });
+
+    /**
+     * load data to table variant
+     */
+    function loadDataToTblVariants(){
+        let i=1;
+        tblVariants.clear().draw();
+        $.each( variantsData, function( key, value ) {
+            let dataItem=[];
+            dataItem.push(value);
+            dataItem.push(i++);
+            dataItem.push(subBarcode(value.barcode));
+            dataItem.push(value.name);
+            dataItem.push(value.unit.name);
+            dataItem.push(value.conversion_rate);
+            dataItem.push(value.effective_price);
+            dataItem.push(value.id);
+            tblVariants.row.add(dataItem).draw(false); // Add new data
+        })
+    }
+
+    /**
+     * tao row lich su gia
+     * @param data
+     * @returns {*|jQuery}
+     */
+    function createUnitPriceRowTable(data){
+        let tr = $('<tr>').attr('data-unit-price-id', data.id);
+        let status=(data.status)?'<span class="right badge badge-success active">Hiệu lực</span>':'<span class="right badge badge-danger">Vô hiệu</span>'
+        tr.append($('<td>').addClass('price').text(formatMoney(data.retail)));
+        tr.append($('<td>').text(data.created_date));
+        tr.append($('<td>').text(data.created_by));
+        tr.append($('<td>').html(`${status}`));
+        $('#unitPriceTable tbody').append(tr);
+        return tr;
+    }
+
+    /**
+     * tao row gia dac biet
+     * @param data
+     */
+    function createScheduleRowTable(data){
+        var tr = $('<tr>').attr('data-price-schedule-id', data.id);
+        tr.append($('<td>').addClass('price').text(formatMoney(data.special_price)));
+        tr.append($('<td>').text(data.start_date));
+        tr.append($('<td>').text(data.end_date));
+        tr.append($('<td>').html('<button class="btn btn-sm btn-danger btn-delete-schedule"><i class="fas fa-trash-alt"></i></button>'));
+        $('#scheduleTable tbody').append(tr);
+        return tr;
+    }
+
+    /**
+     * tao row gia theo nhom
+     * @param data
+     */
+    function createGroupPriceRowTable(data){
+        var tr = $('<tr>').attr('data-group-price-id', data.id);
+        tr.append($('<td>').addClass('price').text(formatMoney(data.price)));
+        tr.append($('<td>').text(data.group?.name));
+        tr.append($('<td>').html('<button class="btn btn-sm btn-danger btn-delete-group"><i class="fas fa-trash-alt"></i></button>'));
+        $('#groupPriceTable tbody').append(tr);
+        return tr;
+    }
+
+    /**
+     * tao row gia theo tier
+     * @param data
+     */
+    function createTierPriceRowTable(data){
+        var tr = $('<tr>').attr('data-tier-price-id', data.id);
+        tr.append($('<td>').addClass('price').text(formatMoney(data?.price)));
+        tr.append($('<td>').text(data?.min_qty));
+        tr.append($('<td>').text(data?.max_qty));
+        tr.append($('<td>').html('<button class="btn btn-sm btn-danger btn-delete-tier"><i class="fas fa-trash-alt"></i></button>'));
+        $('#tierPriceTable tbody').append(tr);
+        return tr;
+    }
+</script>
+
+<style>
+    .table thead th{border-bottom: unset}
+    .tr-highlight {
+        animation: fadeHighlight 2s ease-out;
+    }
+    @keyframes fadeHighlight {
+        0%   { background-color: #007bff; }
+        100% { background-color: transparent; }
+    }
+</style>

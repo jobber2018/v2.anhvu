@@ -1,0 +1,250 @@
+<?php
+use Sulde\Service\Common\Define;
+$form = $this->form;
+$form->setAttributes([
+    'enctype'=>'multipart/form-data'
+]);
+$form->prepare();
+?>
+<section class="content">
+    <div class="container-fluid">
+        <?=$this->form()->openTag($form)?>
+        <input type="hidden" name="id" value="<?=$this->customer->getId()?>">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin khách hàng</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('name'))?>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('name'));
+                                    echo $this->formElementErrors($form->get('name'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('owner_name'))?>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('owner_name'));
+                                    echo $this->formElementErrors($form->get('owner_name'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('mobile'))?>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('mobile'));
+                                    echo $this->formElementErrors($form->get('mobile'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('group'))?>
+                                <div class="col-sm-4 col-md-4">
+                                    <?php
+                                    echo $this->formElement($form->get('group'));
+                                    echo $this->formElementErrors($form->get('group'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('route'))?>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('route'));
+                                    echo $this->formElementErrors($form->get('route'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('delivery_note'))?>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('delivery_note'));
+                                    echo $this->formElementErrors($form->get('delivery_note'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <?=$this->formLabel($form->get('note'))?>
+                                <div class="col-sm-9 col-md-9">
+                                    <?php
+                                    echo $this->formElement($form->get('note'));
+                                    echo $this->formElementErrors($form->get('note'),['class' => 'error']);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-info float-right edit-customer">
+                            <i class="fas fa-save"></i>
+                            Cập nhật
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span class="fa fa-upload"></span>
+                            Hình đại diện
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formElement($form->get('imageFile'));
+                            echo $this->formElementErrors($form->get('imageFile'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?=$this->form()->closeTag()?>
+    </div>
+</section>
+
+<!-- jquery-validation -->
+<script src="/vendor/adminlte/plugins/jquery/jquery-validation/jquery.validate.min.js"></script>
+<script src="/vendor/adminlte/plugins/jquery/jquery-validation/additional-methods.min.js"></script>
+
+<!--File input-->
+<link href="/vendor/adminlte/plugins/kartik/dist/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/vendor/adminlte/plugins/kartik/dist/js/fileinput.min.js"></script>
+<script src="/vendor/adminlte/plugins/kartik/dist/themes/fa5/theme.js" type="text/javascript"></script>
+<script>$.fn.fileinput.defaults.theme = 'fa5';</script>
+
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+
+<script>
+    let customerImage= '<?=$this->customer->getImage()?>';
+    customerImagePath =  (customerImage)?"<?=Define::CUSTOMER_IMAGE_PATH.$this->customer->getImage()?>":"<?=Define::NO_IMAGE_PATH?>";
+    $( document ).ready(function() {
+        $("#imageFile").fileinput({
+            showUpload: false,
+            showCaption: false,
+            browseClass: "btn btn-danger",
+            dropZoneEnabled: false,
+            maxFileSize: 10000,
+            allowedFileExtensions: ['jpg', 'png', 'jpeg'],
+            initialPreview: [
+                customerImagePath
+            ],
+            initialPreviewAsData: true, // identify if you are sending preview data only and not the raw markup
+            initialPreviewFileType: 'image', // image is the default and can be overridden in config below
+            initialPreviewConfig: [
+                {url: "<?=$this->url('customer-admin',['action'=>'delete-image'])?>",key:<?=$this->customer->getId()?>}
+            ]
+        });
+        $('#group').select2({theme: 'bootstrap4'});
+
+        $('#route').select2({
+            theme: 'bootstrap4',
+            escapeMarkup: function (markup) {
+                return markup; // 🔥 cho phép HTML
+            },
+            templateResult: function (data) {
+                if (!data.id) return data.text;
+
+                const html = $(data.element).data('html');
+                return html ? $(html) : data.text;
+            },
+            templateSelection: function (data) {
+                const html = $(data.element).data('html');
+                return html ? $(html) : data.text;
+            }
+        });
+
+        $.validator.setDefaults({
+            submitHandler: function (form) {
+                run_waitMe();
+                $.ajax({
+                    url: $(form).attr('action'),
+                    method: 'POST',
+                    data: new FormData(form),
+                    contentType: false,
+                    processData: false,
+                    headers: {Accept: "application/json; charset=utf-8"},
+                    success: function (response) {
+                        if(response.status){
+                            Swal.fire({
+                                icon: "success",
+                                confirmButtonText: "Đã hiểu",
+                                text: response.message,
+                                allowOutsideClick: false
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href="<?=$this->url('customer-admin',['action'=>'detail','id'=>$this->customer->getPublicId()])?>";
+                                }
+                            });
+
+                        }else{
+                            Toast.fire({title: response.message, icon: 'error'});
+                        }
+                        stop_waitMe()
+                    },
+                    error: function (xhr) {
+                        console.log("Error:", xhr);
+                    }
+                });
+
+                return false; // chặn submit thật
+            }
+        });
+        $('#customer-form').validate({
+            rules: {
+                name: {
+                    required: true
+                },
+                owner_name: {
+                    required: true
+                },
+                mobile: {
+                    required: true,
+                    minlength:10
+                }
+            },
+            messages: {
+                name:"Nhập tên cửa hàng",
+                owner_name: "Nhập tên chủ cửa hàng hoặc ngươi liên hệ",
+                mobile: "Nhập số điện thoại cửa hàng hoặc người lên hệ",
+            },
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group .row div').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+    })
+</script>

@@ -1,0 +1,65 @@
+<?php
+
+use Sulde\Service\Common\Common;
+
+$title="Admin dashboard";
+$this->headTitle($title);
+?>
+
+<!-- START BREADCRUMB -->
+<ul class="breadcrumb">
+    <li class="active">Staff dashboard</li>
+</ul>
+<!-- END BREADCRUMB -->
+
+<!-- PAGE CONTENT WRAPPER -->
+<div class="page-content-wrap">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <?php
+                    foreach ( $this->privileges as $privilege){
+                        if($privilege['dashboard_display'] == 1){
+                            ?>
+                            <a style="margin-top: 5px;" href="<?=$this->url($privilege['url'],['action'=>$privilege['action']])?>" class="btn btn-default">
+                                <i class="<?=$privilege['icon']?>" style="font-size: 25pt; padding-top: 5px"></i>
+                                <p style="padding-top: 5px; margin-bottom: 5px; font-weight: bold"><?=$privilege['name']?></p>
+                            </a>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="clearfix">
+                        <div style="text-align: center"><span class="fa fa-signal" style="font-size: 100pt; color: #2db3dc"></span></div>
+                        <h3 class="panel-title" style="font-weight: bold">DOANH THU NGÀY</h3>
+                        <a href="<?=$this->url('admin-dashboard',['action'=>'report'])?>" class="pull-right" style="padding-top: 10px">Xem chi tiết</a>
+                    </div>
+                    <div style="margin-bottom: 10px">
+                        <span style="color: #2db3dc; font-size: 18pt; font-weight: bold; text-align: center;"><?=Common::formatMoney($this->totalRevenue)?></span>
+                    </div>
+                    <div style="padding-top: 10px; border-top: 1px solid #e5e5e5">
+                        <table style="width: 100%">
+                            <tr>
+                                <td>Tiền mặt</td>
+                                <td style="text-align: center;">Chuyển khoản</td>
+                                <td style="text-align: right;">Chờ xác nhận</td>
+                            </tr>
+                            <tr>
+                                <td style=" padding-top: 5px; font-weight: bold"><?=Common::formatMoney($this->totalCash)?></td>
+                                <td style="text-align: center; font-weight: bold"><?=Common::formatMoney($this->totalBank)?></td>
+                                <td style="text-align: right; font-weight: bold"><?=Common::formatMoney(0)?></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

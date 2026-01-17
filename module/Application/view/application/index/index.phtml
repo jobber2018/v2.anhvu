@@ -1,0 +1,676 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-text-width"></i>
+                            Description
+                        </h3>
+                        <div class="card-tools">
+                            <a href="/admin/product/add" class="btn btn-info pull-right">
+                                <span class="fa fa-plus"></span>
+                                Thêm mới sản phẩm
+                            </a>
+
+                            <button class="btn btn-success btn-test pull-right">
+                                <span class="fa fa-plus"></span>
+                                Thêm mới
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="tblTable" class="display">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>Office</th>
+                                <th>Age</th>
+                                <th>Start date</th>
+                                <th>Salary</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Tiger Nixon</td>
+                                <td>System Architect</td>
+                                <td>Edinburgh</td>
+                                <td>61</td>
+                                <td>2011-04-25</td>
+                                <td>$320,800</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-6">
+                <style>
+                    #autocomplete-list {
+                        max-height: 250px;
+                        overflow-y: auto;
+                        border: 1px solid #ddd;
+                    }
+
+                    .autocomplete-item:hover {
+                        background-color: #f4f6f9;
+                        cursor: pointer;
+                    }
+
+                </style>
+                <div class="form-group position-relative" id="product_search">
+                    <label>Tìm sản phẩm</label>
+                    <div class="input-group">
+                        <input type="search"
+                               class="form-control"
+                               placeholder="Nhập mã hoặc tên sản phẩm...">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Danh sách gợi ý (autocomplete) -->
+                    <ul id="autocomplete-list"
+                        class="list-group position-absolute w-100"
+                        style="z-index: 1000; display: none;">
+                    </ul>
+                </div>
+                <div class="form-group position-relative" id="product_search_2">
+                    <label>Tìm sản phẩm 2</label>
+                    <div class="input-group">
+                        <input type="search"
+                               id="product-search-2"
+                               class="form-control"
+                               placeholder="Nhập mã hoặc tên sản phẩm...">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Danh sách gợi ý (autocomplete) -->
+                    <ul id="autocomplete-list-2"
+                        class="list-group position-absolute w-100"
+                        style="z-index: 1000; display: none;">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="callout callout-info">
+            <h5><i class="fas fa-info"></i> Note:</h5>
+            This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
+        </div>
+    </div>
+</section>
+<style>
+
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-text-width"></i>
+                            Description
+                        </h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <dl>
+                            <dt>Description lists</dt>
+                            <dd>A description list is perfect for defining terms.</dd>
+                            <dt>Euismod</dt>
+                            <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+                            <dd>Donec id elit non mi porta gravida at eget metus.</dd>
+                            <dt>Malesuada porta</dt>
+                            <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
+                        </dl>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- ./col -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-text-width"></i>
+                            Description Horizontal
+                        </h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">Description lists</dt>
+                            <dd class="col-sm-8">A description list is perfect for defining terms.</dd>
+                            <dt class="col-sm-4">Euismod</dt>
+                            <dd class="col-sm-8">Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+                            <dd class="col-sm-8 offset-sm-4">Donec id elit non mi porta gravida at eget metus.</dd>
+                            <dt class="col-sm-4">Malesuada porta</dt>
+                            <dd class="col-sm-8">Etiam porta sem malesuada magna mollis euismod.</dd>
+                            <dt class="col-sm-4">Felis euismod semper eget lacinia</dt>
+                            <dd class="col-sm-8">Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo
+                                sit amet risus.
+                            </dd>
+                        </dl>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- ./col -->
+            <div class="col-md-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Alerts
+                        </h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-ban"></i> Alert!</h5>
+                            Danger alert preview. This alert is dismissable. A wonderful serenity has taken possession of my
+                            entire
+                            soul, like these sweet mornings of spring which I enjoy with my whole heart.
+                        </div>
+                        <div class="alert alert-info alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-info"></i> Alert!</h5>
+                            Info alert preview. This alert is dismissable.
+                        </div>
+                        <div class="alert alert-warning alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-exclamation-triangle"></i> Alert!</h5>
+                            Warning alert preview. This alert is dismissable.
+                        </div>
+                        <div class="alert alert-success alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-check"></i> Alert!</h5>
+                            Success alert preview. This alert is dismissable.
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-bullhorn"></i>
+                            Callouts
+                        </h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="callout callout-danger">
+                            <h5>I am a danger callout!</h5>
+
+                            <p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire
+                                soul,
+                                like these sweet mornings of spring which I enjoy with my whole heart.</p>
+                        </div>
+                        <div class="callout callout-info">
+                            <h5>I am an info callout!</h5>
+
+                            <p>Follow the steps to continue to payment.</p>
+                        </div>
+                        <div class="callout callout-warning">
+                            <h5>I am a warning callout!</h5>
+
+                            <p>This is a yellow callout.</p>
+                        </div>
+                        <div class="callout callout-success">
+                            <h5>I am a success callout!</h5>
+
+                            <p>This is a green callout.</p>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-6">
+                <!-- jquery validation -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Example <small>jQuery Validation</small></h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form id="quickForm">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Email address</label>
+                                <input type="email" name="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Password</label>
+                                <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                            </div>
+                            <div class="form-group mb-0">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="terms" class="custom-control-input" id="exampleCheck1">
+                                    <label class="custom-control-label" for="exampleCheck1">I agree to the <a href="#">terms of service</a>.</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-6">
+                <div class="card card-primary">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="customSwitch1">
+                                <label class="custom-control-label" for="customSwitch1">Toggle this custom switch element</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                                <input type="checkbox" class="custom-control-input" id="customSwitch3">
+                                <label class="custom-control-label" for="customSwitch3">Toggle this custom switch element with custom colors danger/success</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" disabled id="customSwitch2">
+                                <label class="custom-control-label" for="customSwitch2">Disabled custom switch element</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Bootstrap Switch -->
+            <div class="card card-secondary">
+                <div class="card-header">
+                    <h3 class="card-title">Bootstrap Switch</h3>
+                </div>
+                <div class="card-body">
+                    <input type="checkbox" name="my-checkbox" checked data-bootstrap-switch>
+                    <input type="checkbox" name="my-checkbox" checked data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- jquery-validation -->
+<script src="https://adminlte.io/themes/v3/plugins/jquery-validation/jquery.validate.min.js"></script>
+<script src="https://adminlte.io/themes/v3/plugins/jquery-validation/additional-methods.min.js"></script>
+
+<!-- Bootstrap Switch -->
+<script src="https://adminlte.io/themes/v3/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+
+<script>
+    $(function () {
+        $.validator.setDefaults({
+            submitHandler: function () {
+                alert( "Form successful submitted!" );
+            }
+        });
+        $('#quickForm').validate({
+            rules: {
+                email: {
+                    required: true,
+                    email: true,
+                },
+                password: {
+                    required: true,
+                    minlength: 5
+                },
+                terms: {
+                    required: true
+                },
+            },
+            messages: {
+                email: {
+                    required: "Please enter a email address",
+                    email: "Please enter a valid email address"
+                },
+                password: {
+                    required: "Please provide a password",
+                    minlength: "Your password must be at least 5 characters long"
+                },
+                terms: "Please accept our terms"
+            },
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+
+
+        $("input[data-bootstrap-switch]").each(function(){
+            $(this).bootstrapSwitch('state', $(this).prop('checked'));
+        })
+    });
+</script>
+<script>
+    const searchCustom = function (userConfig = {}) {
+        //default html search box
+        /*
+        <div class="form-group position-relative" id="product_search">
+            <label>Tìm sản phẩm</label>
+            <div class="input-group">
+                <input type="search"
+                       class="form-control"
+                       placeholder="Nhập mã hoặc tên sản phẩm...">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-default">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Danh sách gợi ý (autocomplete) -->
+            <ul id="autocomplete-list"
+                class="list-group position-absolute w-100"
+                style="z-index: 1000; display: none;">
+            </ul>
+        </div>
+        * */
+        // ===========================
+        // DEFAULT CONFIG
+        // ===========================
+        const config = {
+            search:'#product_search',
+            list: "#autocomplete-list",
+            api: "/admin/product/autocomplete?q=",
+            empty_message:'Khoong co san pham',
+            delay: 400,
+            onSelect: null
+        };
+
+        Object.assign(config, userConfig);
+
+        let timer = null;
+
+        // ===========================
+        // INIT
+        // ===========================
+        function init() {
+            bindInputEvent();
+            bindSelectEvent();
+            bindOutsideClickEvent();
+        }
+
+        // ===========================
+        // EVENT: USER INPUT
+        // ===========================
+        function bindInputEvent() {
+            let input = `${config.search} input`;
+            $(input).on("input", function () {
+                clearTimeout(timer);
+
+                const keyword = $(this).val().trim();
+                toggleIcon(true);
+
+                timer = setTimeout(() => {
+                    if (keyword === "") {
+                        hideList();
+                        toggleIcon(false);
+                        return;
+                    }
+                    search(keyword);
+                }, config.delay);
+            });
+
+            $(input).on("keydown", handleKeyboardNavigation);
+        }
+
+        function handleKeyboardNavigation(e) {
+            const items = $(config.list).find(".autocomplete-item");
+            if (!items.length) return;
+
+            let active = items.filter(".active");
+            let index = items.index(active);
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setActiveItem(items, index + 1);
+            }
+
+            else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setActiveItem(items, index - 1);
+            }
+
+            else if (e.key === "Enter") {
+                e.preventDefault();
+                active.click();
+            }
+        }
+
+        function setActiveItem(items, index) {
+            if (index < 0) index = items.length - 1;
+            if (index >= items.length) index = 0;
+
+            items.removeClass("active");
+            const item = items.eq(index).addClass("active")[0];
+
+            item.scrollIntoView({
+                block: "nearest",
+                behavior: "smooth"
+            });
+        }
+
+        // ===========================
+        // EVENT: CLICK ON ITEM
+        // ===========================
+        function bindSelectEvent() {
+            $(document).on("click", `${config.list} .autocomplete-item`, function () {
+                const selectedData = $(this).data('value');
+                $(`${config.search} input`).val('');
+                hideList();
+                if (typeof config.onSelect === "function") {
+                    config.onSelect(selectedData);
+                }
+            });
+        }
+
+        // ===========================
+        // EVENT: CLICK OUTSIDE
+        // ===========================
+        function bindOutsideClickEvent() {
+            $(document).on("click", function (e) {
+                if (!$(e.target).closest(`${config.search} input`).length) {
+                    hideList();
+                }
+            });
+        }
+
+        // ===========================
+        // AJAX SEARCH
+        // ===========================
+        function search(keyword) {
+            $.get(config.api + encodeURIComponent(keyword), function (response) {
+                renderList(response.products || []);
+                toggleIcon(false);
+            });
+        }
+
+        // ===========================
+        // RENDER AUTOCOMPLETE
+        // ===========================
+        function renderList(products) {
+            const box = $(config.list);
+            box.empty();
+
+            if (!products.length) {
+                box.append(`<li class="list-group-item autocomplete-item" data-value='{}'>
+                    ${config.empty_message}
+                </li>`);
+            } else {
+                products.forEach(p => {
+                    box.append(`
+                    <li class="list-group-item autocomplete-item"
+                        data-value='${JSON.stringify(p)}'>
+                        <b>${p.name}</b>
+                    </li>
+                `);
+                });
+            }
+
+            box.show();
+            box.find(".autocomplete-item").first().addClass("active");
+        }
+
+        // ===========================
+        // HELPERS
+        // ===========================
+        function hideList() {
+            $(config.list).hide();
+        }
+
+        function toggleIcon(loading) {
+            // const icon = $(config.icon);
+            const icon = $(`${config.search} .input-group-append button i`);
+            icon.toggleClass("fa-search", !loading)
+                .toggleClass("fa-spinner fa-spin", loading);
+        }
+
+        // ===========================
+        // PUBLIC API
+        // ===========================
+        return {
+            init
+        };
+    };
+
+    const purchase = function (userConfig = {}) {
+        const config = {};
+
+        Object.assign(config, userConfig);
+
+
+        // ===========================
+        // INIT
+        // ===========================
+        function init() {
+            bindClickEvent();
+            datatable();
+        }
+
+        function bindClickEvent(){
+            $('.btn-test').click(function(){
+                console.log("The button was clicked!");
+            });
+        }
+
+        function datatable(){
+            // $('#tblProduct').DataTable();
+        }
+
+        // ===========================
+        // PUBLIC API
+        // ===========================
+        return {
+            init
+        };
+    }
+    // search autocomplete
+    $(document).ready(function () {
+
+        let productSearch = searchCustom({
+            onSelect(product) {
+                console.log('product-search-1',product);
+            }
+        });
+        productSearch.init();
+
+        const productSearch2 = searchCustom({
+            search:'#product_search_2',
+            list: '#autocomplete-list-2',
+            onSelect(product) {
+                console.log('product-search-2',product);
+            }
+        });
+        productSearch2.init();
+
+        let test=purchase();
+            test.init();
+        /*
+        $("#product-search").on("keyup", function () {
+            let query = $(this).val();
+
+            if (query.length < 1) {
+                $("#autocomplete-list").hide();
+                return;
+            }
+
+            $.ajax({
+                url: "/admin/product/autocomplete?q=" + query,
+                method: "GET",
+                success: function (data) {
+                    let box = $("#autocomplete-list");
+                    box.empty();
+                    console.log(data);
+                    if (data.variants.length === 0) {
+                        box.append(
+                            `<li class="list-group-item autocomplete-item text-muted">Không có kết quả</li>`
+                        );
+                        // box.hide();
+                        return;
+                    }
+
+                    data.variants.forEach(item => {
+                        box.append(`
+                        <li class="list-group-item autocomplete-item"
+                            data-id="${item.id}"
+                            data-name="${item.name}"
+                            data-variant='${JSON.stringify(item)}'>
+                            <b>${item.id}</b> - ${item.name}
+                        </li>
+                    `);
+                    });
+
+                    box.show();
+                }
+            });
+        });
+
+        // Khi bấm vào item gợi ý
+        $(document).on("click", ".autocomplete-item", function () {
+            let name = $(this).data("name");
+
+            $("#product-search").val(name);
+            $("#autocomplete-list").hide();
+
+            // TODO: tự động fill vào form sản phẩm
+            console.log("Selected product:", $(this).data());
+        });
+
+        // Click ra ngoài thì đóng gợi ý
+        $(document).click(function (e) {
+            if (!$(e.target).closest("#product-search").length) {
+                $("#autocomplete-list").hide();
+            }
+        });
+        */
+    });
+
+</script>

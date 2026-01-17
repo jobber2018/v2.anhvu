@@ -1,0 +1,123 @@
+<div class="card card-default collapsed-card direct-chat direct-chat-primary">
+    <div class="card-header">
+        <h3 class="card-title">Ghi chú</h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <!-- Conversations are loaded here -->
+        <div class="direct-chat-messages">
+
+            <?php
+
+            use Sulde\Service\Common\Common;
+
+            foreach ($purchase->getMessage() as $messageItem){
+                if($userLogin->getUsername()==$messageItem->getCreatedBy()){
+                    $avatar = ($userLogin->getAvatar())?$userLogin->getAvatar():'/assets/images/avatar.png';
+                    ?>
+                    <!-- Message to the right -->
+                    <div class="direct-chat-msg right">
+                        <div class="direct-chat-infos clearfix">
+                            <span class="direct-chat-name float-right"><?=$messageItem->getCreatedBy()?></span>
+                            <span class="direct-chat-timestamp float-left"><?=Common::getTimeAgo($messageItem->getCreatedDate())?></span>
+                        </div>
+                        <!-- /.direct-chat-infos -->
+                        <img class="direct-chat-img" src="<?=$avatar?>">
+                        <!-- /.direct-chat-img -->
+                        <div class="direct-chat-text">
+                            <?=$messageItem->getMessage()?>
+                        </div>
+                        <!-- /.direct-chat-text -->
+                    </div>
+                    <!-- /.direct-chat-msg -->
+                    <?php
+                }else{
+                    ?>
+                    <!-- Message. Default to the left -->
+                    <div class="direct-chat-msg">
+                        <div class="direct-chat-infos clearfix">
+                            <span class="direct-chat-name float-left"><?=$messageItem->getCreatedBy()?></span>
+                            <span class="direct-chat-timestamp float-right"><?=Common::getTimeAgo($messageItem->getCreatedDate())?></span>
+                        </div>
+                        <!-- /.direct-chat-infos -->
+                        <img class="direct-chat-img" src="/assets/images/avatar.png">
+                        <!-- /.direct-chat-img -->
+                        <div class="direct-chat-text">
+                            <?=$messageItem->getMessage()?>
+                        </div>
+                        <!-- /.direct-chat-text -->
+                    </div>
+                    <!-- /.direct-chat-msg -->
+                    <?php
+                }
+            }
+            ?>
+        </div>
+        <!--/.direct-chat-messages-->
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer">
+        <form action="#" method="post">
+            <div class="input-group">
+                <input type="text" id="order-note" name="order-note" placeholder="Nhập ghi chú ..." class="form-control">
+                <span class="input-group-append">
+                  <button type="button" id="btnSendNote" class="btn btn-primary">Gửi</button>
+                </span>
+            </div>
+        </form>
+    </div>
+    <!-- /.card-footer-->
+</div>
+<script>
+    $(document).ready(() => {
+        scrollToBottom();
+        //note
+        $('#btnSendNote').click(function() {
+            let noteMessage = $('#order-note').val();
+            if(!noteMessage) return;
+            run_waitMe('.direct-chat');
+            $.ajax({
+                url: '<?=$this->url('purchase-admin',['action'=>'add-message'])?>',
+                method: 'POST',
+                data: {purchaseId:<?=$purchase->getId()?>,message:noteMessage},
+                success: function (response) {
+                    if(response.status){
+                        let data= response.data;
+                        let message=`<div class="direct-chat-msg right">
+                                            <div class="direct-chat-infos clearfix">
+                                                <span class="direct-chat-name float-right">${data.created_by}</span>
+                                                <span class="direct-chat-timestamp float-left">${data.created_time_ago}</span>
+                                            </div>
+                                            <img class="direct-chat-img" src="<?=($userLogin->getAvatar())?$userLogin->getAvatar():'/assets/images/avatar.png'?>">
+                                            <div class="direct-chat-text">
+                                                ${data.message}
+                                            </div>
+                                        </div>`
+
+                        $('.direct-chat-messages').append(message);
+                        scrollToBottom();
+                    }else{
+                        Toast.fire({title: response.message, icon: 'error'});
+                    }
+                    stop_waitMe('.direct-chat')
+                },
+                error: function (xhr) {
+                    console.log("Error:", xhr);
+                }
+            });
+        });
+    })
+    function scrollToBottom() {
+        const box = $('.direct-chat-messages');
+        box.scrollTop(box[0].scrollHeight);
+    }
+
+</script>

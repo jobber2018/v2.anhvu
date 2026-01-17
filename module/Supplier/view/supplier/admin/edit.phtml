@@ -1,0 +1,84 @@
+<?php
+$form = $this->form;
+$form->setAttributes(['enctype'=>'multipart/form-data']);
+$form->prepare();
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <?=$this->form()->openTag($form)?>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('name'));
+                            echo $this->formElement($form->get('name'));
+                            echo $this->formElementErrors($form->get('name'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('short_name'));
+                            echo $this->formElement($form->get('short_name'));
+                            echo $this->formElementErrors($form->get('short_name'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('address'));
+                            echo $this->formElement($form->get('address'));
+                            echo $this->formElementErrors($form->get('address'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('mobile'));
+                            echo $this->formElement($form->get('mobile'));
+                            echo $this->formElementErrors($form->get('mobile'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('email'));
+                            echo $this->formElement($form->get('email'));
+                            echo $this->formElementErrors($form->get('email'),['class' => 'error']);
+                            ?>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('tax_code'));
+                            echo $this->formElement($form->get('tax_code'));
+                            echo $this->formElementErrors($form->get('tax_code'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('contact_person'));
+                            echo $this->formElement($form->get('contact_person'));
+                            echo $this->formElementErrors($form->get('contact_person'),['class' => 'error']);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <?php
+                            echo $this->formLabel($form->get('notes'));
+                            echo $this->formElement($form->get('notes'));
+                            echo $this->formElementErrors($form->get('notes'),['class' => 'error']);
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" name="btnSubmit"  id="btnSubmit" class="btn btn-success float-right">
+                    <i class="fa fa-edit"></i>
+                    Cập nhật
+                </button>
+            </div>
+            <?=$this->form()->closeTag()?>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,119 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <div class="btn-group">
+                                <a href="<?=$this->url('customer-admin',['action'=>'add'])?>" class="btn btn-info pull-right">
+                                    Thêm mới
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display" id="tblCustomer">
+                            <thead>
+                            <tr>
+                                <th style="border-right: 1px solid #E5E5E5"></th>
+                                <th style="border-right: 1px solid #E5E5E5; text-align: center">No.</th>
+                                <th style="border-right: 1px solid #E5E5E5; text-align: center"></th>
+                                <th style="border-right: 1px solid #E5E5E5">Tên khách hàng</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Liên hệ</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Điện thoại</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Nhóm</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Tuyến</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Nhân viên</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Ghi chú</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Ngày tạo</th>
+                                <th style="border-right: 1px solid #E5E5E5;">Người tạo</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    let tblCustomer,stt=1;
+    $(document).ready(function () {
+        tblCustomer=$('#tblCustomer').DataTable({
+            responsive:true,
+            select:true,
+            paging: true,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: false,
+            processing: true,
+            serverSide: true,
+            stateSave: true,
+            autoWidth: false,
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+                top: ['search', 'pageLength']
+            },
+            language: {
+                searchPlaceholder: "Tìm kiếm theo tên, điện thoại, Nhóm, tuyến."
+            },
+            initComplete: function() {
+                $(this.api().table().container()).find('input[type="search"]').attr('autocomplete', 'off');
+            },
+            columnDefs: [
+                // { targets: [1,4,5,6,7,8], className: 'min-desktop'},
+                { name:'rowData', targets: 0, visible: false},
+                { name: 'no', targets: 1,className: 'dt-body-center'},
+                {
+                    name: 'image', targets: 2, width: 50,className: 'dt-body-center',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        if (cellData) {
+                            $(td).html('<img src="'+cellData+'">');
+                        }
+                    }
+                }
+            ],
+            ajax: {
+                url: '<?=$this->url('customer-admin',['action'=>'list'])?>',
+                type: 'POST',
+                dataSrc: function (json) {
+                    let data=[];
+                    let i=1;
+                    $.each( json.data, function( key, customer ) {
+                        let dataItem=[];
+                        dataItem.push(customer);
+                        dataItem.push(i);
+                        dataItem.push(customer.image);
+
+                        let defaultAddress;
+                        if(customer.address){
+                            $.each(customer.address, function(index, value) {
+                                if(value.is_default==1)
+                                    defaultAddress=value;
+                            })
+                        }
+                        let name=`<a class="title" href="<?=$this->url('customer-admin',['action'=>'detail'])?>/${customer.public_id}">${customer.name}</a>`
+
+                        if(defaultAddress)
+                            name+=`<br><small>${defaultAddress.address}</small>`;
+
+                        dataItem.push(name);
+                        dataItem.push(customer.owner_name);
+                        dataItem.push(customer.mobile);
+                        dataItem.push(customer.group.name);
+                        dataItem.push(customer.route.name);
+                        dataItem.push(customer.route.user.name);
+                        dataItem.push(customer.note);
+                        dataItem.push(customer.created_date);
+                        dataItem.push(customer.created_by);
+                        data.push(dataItem);
+                        i++;
+                    });
+                    return data;
+                }
+            }
+        });
+    });
+</script>

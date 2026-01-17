@@ -1,0 +1,212 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <div class="card-title text-muted padding-top-10">
+                    <?=$this->message?>
+                </div>
+                <div class="card-tools">
+                    <button id="submit" class="btn btn-info" type="submit">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Nhập dữ liệu
+                    </button>
+                    <a class="btn btn-success" href="<?=$this->url('product-excel-admin',['action'=>'upload'])?>">
+                        Quay lại
+                    </a>
+                </div>
+            </div>
+            <div class="card-body" style="padding-top: unset">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="f" name="f" method="post">
+                            <table class="display nowrap stripe row-border order-column" id="tblDataImport">
+                                <thead>
+                                <tr>
+                                    <?php foreach ($this->header as $col => $label): ?>
+                                        <th nowrap=""><?=$label?></th>
+                                    <?php endforeach; ?>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php
+                                foreach ($this->dataValidate as $index => $data){
+                                    $td='';
+                                    $clsTR='';
+                                    foreach ($data as $col => $value){
+                                        $cls='';
+                                        $tooltip='';
+                                        if(!@$value['is_valid']){
+                                            $cls='is-invalid';
+                                            $tooltip='data-toggle-1="tooltip" data-placement="top" title="'.@$value['message'].'" data-original-title="'.@$value['message'].'"';
+                                        }
+                                        if($cls=='is-invalid')$clsTR='highlight-tr';
+                                        $required=($value['rule']["required"])?"required":"";
+
+                                        if(@$value['rule']['type']=='select'){
+                                            $element='<select style="width:100%" '.$required.' class="from-control '.$cls.' select" name="'.$index.'['.$col.']" '.$tooltip.'>';
+                                            foreach ($value['rule']['options'] as $k=>$v){
+                                                $selected=$v['id']==@$value['selected']?"selected":"";
+                                                $element.='<option value="'.$v['id'].'" '.$selected.'>'.$v['name'].'</option>';
+                                            }
+                                            $element.='</select>';
+                                        }else{
+                                            $cls.=' '.@$value['class']?@$value['class']:'';
+                                            $element='<input class="form-control '.$cls.'" '.$required.' type="'.@$value['rule']["type"].'" name="'.$index.'['.$col.']" value="'.@$value['value'].'" '.$tooltip.'>';
+                                        }
+                                        $td.='<td>'.$element.'</td>';
+                                    }
+                                    echo '<tr class="'.$clsTR.'">'.$td.'</tr>';
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    th, td { white-space: nowrap; }
+    .highlight-tr{background-color: #ff00000d !important;}
+    .tooltip {
+        pointer-events: none !important;
+    }
+    .highlight-col{background-color: #e8e9eb}
+</style>
+<!--Select box-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/vendor/adminlte/plugins/select2/css/select2-bootstrap4.min.css">
+<script src="/vendor/adminlte/plugins/select2/js/select2.full.min.js"></script>
+<!--Datatable fixed column-->
+<script src="/vendor/adminlte/plugins/datatables/2.3.5/js/dataTables.fixedColumns.min.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/datatables/2.3.5/css/fixedColumns.dataTables.css">
+
+<script>
+    run_waitMe();
+    $(document).ready(function () {
+        $(".select").select2({theme: 'bootstrap4'});
+        $('#tblDataImport:not(.DTFC_Cloned) [data-toggle-1="tooltip"]').tooltip({
+            trigger: 'click'
+        });
+
+        /*$('.amount').on('keyup change', function() {
+            console.log('=',parseInt($(this).val()).toLocaleString('vi-VN'));
+            // parseInt(data).toLocaleString('vi-VN') + " ₫"
+            let value=getRawMoney($(this).val());
+            console.log('getRawMoney:',value);
+            // $(this).val(formatMoney(value));
+        });*/
+
+        let tblDataImport=$('#tblDataImport').DataTable({
+            // select:true,
+            autoWidth:false,
+            paging: false,
+            scrollCollapse: true,
+            scrollX: true,
+            scrollY: 350,
+            language:{
+                info: "Đang xem _START_ đến _END_ trong tổng _TOTAL_ dòng",
+                zeroRecords: "Không tìm thấy dữ liệu",
+                infoEmpty: "Không có dữ liệu"
+            },
+            fixedColumns: {
+                start: 1
+            },
+            layout: {
+                topEnd: null, // Removes the default search input from the top-end
+            },
+            columnDefs:[
+                { targets: 0, visible: false},
+                { targets: [1], width: 300},
+                { targets: [2,3,12,17], width: '150px'},//dv
+                { targets: [10,15], width: '200px'},//barcode
+                { targets: [5,14,19], width: '150px'},//price
+                { targets: [11,16], width: '250px'},//quy cach
+                { targets: [4,5], width: '50px'},//other
+                { targets: [10,11,12,13,14], className: 'highlight-col'},
+
+            ],
+            deferRender: true,
+            initComplete: function () {
+                stop_waitMe();
+            }
+
+        });
+
+        $('#tblDataImport tbody').on('change', 'input, select', function () {
+            $(this).removeClass('is-invalid').tooltip('hide').removeAttr('data-original-title').removeAttr('title');
+            let tr = $(this).closest('tr');
+            tr.removeClass('highlight-tr');
+            tr.find('input.is-invalid, select.is-invalid').each(function () {
+                tr.addClass('highlight-tr');
+            });
+        });
+
+        $("#f").on("submit", function(event) {
+            event.preventDefault();
+            run_waitMe();
+            $.ajax({
+                url: "<?=$this->url('product-excel-admin',['action'=>"preview"])?>",
+                type: "POST",
+                data: new FormData(this), // lấy toàn bộ dữ liệu (kể cả file),
+                contentType: false,
+                processData: false,
+                headers: {Accept: "application/json; charset=utf-8"}
+            }).done(function(response) {
+                if(response.status==1){
+                    Swal.fire({
+                        icon: "success",
+                        confirmButtonText: "Tiếp tục thêm dữ liệu",
+                        showCancelButton: true,
+                        cancelButtonText: 'Tới danh sách sản phẩm',
+                        text: `Tổng số sản phẩm cần thêm mới: ${response.total_record}. Đã thêm mới ${response.total_record_success}, lỗi chưa thêm mới ${response.total_record_fail}`,
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        }else if(result.isDismissed){
+                            window.location.href='<?=$this->url('product-admin',['action'=>'list'])?>';
+                        }
+                    });
+                }
+                // console.log(response);
+                stop_waitMe();
+            });
+        });
+
+        $('#submit').on('click', function(e){
+            e.preventDefault();
+            let valid=true;
+            tblDataImport.rows().every(function () {
+                var tr = $(this.node());
+
+                tr.removeClass('highlight-tr');
+                tr.find('input.is-invalid, select.is-invalid').each(function () {
+                    tr.addClass('highlight-tr');
+                    valid=false;
+                });
+
+                tr.find('input[required], select[required]').each(function () {
+                    if($(this).attr('required') && !$(this).val()) {
+                        tr.addClass('highlight-tr');
+                        $(this).addClass('is-invalid');
+                        valid=false;
+                    }
+                });
+
+                if (tr.hasClass("highlight-tr")) {
+                    // move lên đầu tbody
+                    tr.prependTo($(tblDataImport.table().body()));
+                }
+            });
+            if(valid===false){
+                Toast.fire({title: 'Vui lòng kiểm tra dữ liệu được đánh dấu màu đỏ trong danh sách!', icon: 'error'});
+                return;
+            }
+            // console.log('valid!!!!');
+            $("#f").submit();
+        });
+    });
+</script>

@@ -1,0 +1,43 @@
+<script id="purchase-amount-info" type="text/html">
+    <div class="card-body">
+        <table style="width: 100%">
+            <tbody>
+            <tr>
+                <th class="text-right">Tổng tiền hàng:</th>
+                <td class="price text-right pr-2 border-bottom pb-2">{{total_order_amount}}</td>
+            </tr>
+            <tr>
+                <td class="text-right pb-2 pt-2">
+                    Chiết khấu
+                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="Chiết khấu theo đơn {{order_discount_amount}}, chiết khấu sản phẩm {{product_discount_amount}} "> </span>:
+                </td>
+                <td class="price text-right pr-2 border-bottom pb-2 pt-2">{{total_discount_amount}}</td>
+            </tr>
+            <tr>
+                <td class="text-right pb-2 pt-2">Thuế suất:</td>
+                <td class="price text-right pr-2 border-bottom pb-2 pt-2">{{total_vat_amount}}</td>
+            </tr>
+            <tr>
+                <th class="text-right pb-2 pt-2">
+                    Tiền hàng phải thanh toán
+                    <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="= Tổng tiền hàng - Chiết khấu + Thuế suất"> </span>:
+                </th>
+                <td class="price text-right border-bottom pr-2 pb-2 pt-2 pl-lg-4" style="width: 130px" nowrap="">{{total_product_payable}}</td>
+            </tr>
+            <tr>
+                <td class="text-right pb-2 pt-2">Phụ phí:</td>
+                <td class="price text-right pr-2 border-bottom pb-2 pt-2">{{total_additional_fees_amount}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer border-top">
+        <div class="row">
+            <label class="col-md-6 col-6">
+                Tổng thanh toán
+                <span class="fa fa-question-circle text-muted" data-toggle="tooltip" data-placement="top" title="" data-original-title="= Tiền hàng phải thanh toán + Phụ phí"> </span>:
+            </label>
+            <div class="col-md-6 col-6 price text-right text-lg  total_order_payable">{{total_order_payable}}</div>
+        </div>
+    </div>
+</script>

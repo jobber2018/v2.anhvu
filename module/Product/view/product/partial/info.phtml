@@ -1,0 +1,333 @@
+<?php
+
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\Define;
+
+?>
+<div class="card card-default">
+    <div class="card-header">
+        <div class="card-tools">
+            <div class="btn-group">
+                <a href="<?=$this->url('product-admin',["action"=>'edit','id'=>$product->getPublicId()])?>" class="btn btn-success pull-right">
+                    <i class="fa fa-edit"></i>
+                    Sửa sản phẩm
+                </a>
+                <a href="<?=$this->url('product-admin',["action"=>'copy','id'=>$product->getPublicId()])?>" type="button" name="btnCopy"  id="btnCopy" class="btn btn-warning pull-right">
+                    <i class="fa fa-copy"></i>
+                    Sao chép
+                </a>
+                <a href="<?=$this->url('product-price-admin',["action"=>'detail','id'=>$product->getPublicId()])?>" type="button" name="btnPriceManage"  id="btnPriceManage" class="btn btn-info active pull-right">
+                    <i class="fas fa-dollar-sign"></i>
+                    Quản lý giá
+                </a>
+
+                <button class="btn btn-danger pull-right trash">
+                    <i class="fas fa-trash"></i>
+                    Xoá sản phẩm
+                </button>
+            </div>
+
+        </div>
+    </div>
+    <div class="card-body product-info">
+        <dl class="row">
+            <dt class="col-sm-3">Tên sản phẩm:</dt>
+            <dt class="col-sm-4 highlight blue-color"><?=$product->getName()?></dt>
+            <dt class="col-sm-2 col-5">Trạng thái:</dt>
+            <dt class="col-sm-3 col-7">
+                <input type="checkbox" class="lock-unlock" <?=($product->getStatus()==Define::DEFAULT_ACTIVE?'checked':'')?> data-bootstrap-switch data-off-color="danger" value="<?=$product->getStatus()?>">
+            </dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Loại sản phẩm:</dt>
+            <dt class="col-sm-4 col-7"><?=$product->getCategoriesName()?></dt>
+            <dt class="col-sm-2 col-5">Tồn kho:</dt>
+            <dt class="col-sm-3 col-7 highlight <?=$product->getInventory()?'blue-color':'red-color'?>">
+                <?=$product->getInventory().' '.$product->getUnitName()?>
+            </dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Đơn vị:</dt>
+            <dt class="col-sm-4 col-7"><?=$product->getUnitName()?></dt>
+            <dt class="col-sm-2 col-5">Sku:</dt>
+            <dt class="col-sm-3 col-7"><?=$product->getSku()?></dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Thuế GTGT (%):</dt>
+            <dt class="col-sm-4 col-7"><?=$product->getVatValue()?></dt>
+            <dt class="col-sm-2 col-5">Thuế nhập khẩu:</dt>
+            <dt class="col-sm-3 col-7"><?=$product->getImportTax()?></dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Tồn kho tối thiểu:</dt>
+            <dt class="col-sm-4 col-7"><?=$product->getNormMin()?></dt>
+            <dt class="col-sm-2 col-5">Tồn kho tối đa:</dt>
+            <dt class="col-sm-3 col-7"><?=$product->getNormMax()?></dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Gợi ý nhập hàng:</dt>
+            <dt class="col-sm-4 col-7"><?=$product->getNormInput()?></dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Ngày tạo:</dt>
+            <dt class="col-sm-4 col-7"><?=Common::formatDateTime($product->getCreatedDate())?></dt>
+            <dt class="col-sm-2 col-5">Ngày cập nhật:</dt>
+            <dt class="col-sm-3 col-7"><?=Common::formatDateTime($product->getUpdatedDate())?></dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-3 col-5">Người tạo:</dt>
+            <dt class="col-sm-4 col-7"><?=$product->getCreatedBy()?></dt>
+            <dt class="col-sm-2 col-5">Người cập nhật:</dt>
+            <dt class="col-sm-3 col-7"><?=$product->getUpdatedBy()?></dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Keyword:</dt>
+            <dt class="col-sm-10">
+                <?php
+                if($product->getKeywordList()){
+                    echo '<span class="list-inline">';
+                    foreach($product->getKeywordList() as $keyword){
+                        echo '<li class="list-inline-item"><span class="badge badge-secondary"><i class="fa fa-tag"></i> '.trim($keyword).'</span></li>';
+                    }
+                    echo '</ul>';
+                }
+                ?>
+            </dt>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Ghi chú:</dt>
+            <dt class="col-sm-10"><?=$product->getNote()?></dt>
+        </dl>
+    </div>
+</div>
+<div class="card card-default">
+    <div class="card-header">
+        <h3 class="card-title">Thuộc tính</h3>
+    </div>
+    <div class="card-body">
+        <table class="display" id="tblVariants">
+            <thead>
+            <tr>
+                <th></th>
+                <th class="number">No.</th>
+                <th>Mã vạch</th>
+                <th>Quy cách</th>
+                <th>Đơn vị</th>
+                <th class="number">Quy đổi</th>
+                <th class="number">Giá bán</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<div class="card card-default">
+    <div class="card-header">
+        <h3 class="card-title">
+            <span class="fa fa-upload"></span>
+            Hình đại diện
+        </h3>
+    </div>
+    <div class="card-body">
+        <form action="#" class="dropzone" id="myDropzone"></form>
+    </div>
+</div>
+
+<!-- Bootstrap Switch -->
+<script src="/vendor/adminlte/plugins/bootstrap/bootstrap-switch.min.js"></script>
+
+<!--dropzone-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/dropzone/css/dropzone.min.css"/>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/dropzone/custom.css"/>
+<script src="/vendor/adminlte/plugins/dropzone/js/dropzone.min.js"></script>
+<script src="/vendor/adminlte/plugins/dropzone/custom.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/lightbox2/css/lightbox.min.css"/>
+<script src="/vendor/adminlte/plugins/lightbox2/js/lightbox.min.js"></script>
+
+<style>
+.product-info dl{border-bottom: 1px solid #e3e4e8; padding-bottom: 15px}
+</style>
+<script>
+    <?php
+    $variantsData=array();
+    if($product->getVariants()){
+        foreach($product->getVariants() as $variantsItem){
+            $variants = $variantsItem->serialize();
+            $variants['cost']=$product->getCost();
+            $variantsData[]=$variants;
+        }
+    }
+    ?>
+    let tblVariants;
+    let variantsData=<?=json_encode($variantsData)?>;
+
+    const dz = initCustomDropzone({
+        selector: "#myDropzone",
+        uploadUrl: "<?=$this->url('product-admin',['action'=>'upload-image','id'=>$product->getId()])?>",
+        deleteUrl: "<?=$this->url('product-admin',['action'=>'delete-image'])?>",
+        fileListUrl: "<?=$this->url('product-admin',['action'=>'file-list','id'=>$product->getId()])?>",
+        defaultMessage:"Kéo thả, hoặc kick vào khung bên dưới để upload ảnh sản phẩm (Chỉ upload file ảnh). Dung lượng ảnh không quá 10MB"
+    });
+
+    $(document).ready(function () {
+        let bs=$("input[data-bootstrap-switch]").bootstrapSwitch().on('switchChange.bootstrapSwitch', function(event, state) {
+            run_waitMe();
+            $.ajax({
+                type: "POST",
+                headers: {Accept: "application/json; charset=utf-8"},
+                url: '<?=$this->url("product-admin",["action"=>"lock-unlock"])?>',
+                data: {id:<?=$product->getId()?>},
+                success: function(response) {
+                    if(response.status==1){
+                        Toast.fire({title: response.message, icon: 'success'});
+                    }else{
+                        Toast.fire({title: response.message, icon: 'error'});
+                        bs.bootstrapSwitch('state', !state, true);
+                    }
+                    stop_waitMe();
+                }
+            });
+        });
+
+        tblVariants=$('#tblVariants').DataTable({
+            responsive:true,
+            select:true,
+            paging: false,
+            ordering: false,
+            info:false,
+            processing: false,
+            serverSide: false,
+            stateSave: false,
+            searching: false,
+            columnDefs: [
+                { targets: [1,2,3,6], className: 'min-desktop'},
+                {
+                    name:'rowData',
+                    targets: 0,
+                    visible: false
+                },{
+                    targets: [1],
+                    width: 10
+                },{
+                    targets: [2,4,5],
+                    width: 100
+                },{
+                    name: 'name',
+                    targets: 3,
+                    width: 200,
+                    className: 'font-weight-bold'
+                },{
+                    name: 'price',
+                    targets: 6,
+                    width: 200,
+                    className: 'price',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        if ( cellData <= 0 ) {
+                            $(td).css('color', 'red');
+                        }
+                        $(td).html(formatMoney(cellData));
+                    }
+                },{
+                    name: 'button',
+                    targets: 7,
+                    className: 'dt-nowrap',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let button='<input type="checkbox" class="lock-unlock" '+(rowData[0].status?'checked':'')+' data-bootstrap-switch data-off-color="danger">';
+                        $(td).html(button);
+                        let bsw=$(td).find('[data-bootstrap-switch]').bootstrapSwitch().on('switchChange.bootstrapSwitch', function(event, state) {
+                            run_waitMe();
+                            $.ajax({
+                                type: "POST",
+                                headers: {Accept: "application/json; charset=utf-8"},
+                                url: '<?=$this->url("product-variant-admin",["action"=>"lock-unlock"])?>',
+                                data: {id:rowData[0].id},
+                                success: function(response) {
+                                    if(response.status==1){
+                                        Toast.fire({title: response.message, icon: 'success'});
+                                        // if(bs.bootstrapSwitch('state')==false)
+                                        //     bs.bootstrapSwitch('state', true,true);
+                                        location.reload();
+                                    }else{
+                                        Toast.fire({title: response.message, icon: 'error'});
+                                        bsw.bootstrapSwitch('state', !state, true);
+                                    }
+                                    stop_waitMe();
+                                }
+                            });
+                        });
+                    }
+                }
+            ]
+        });
+
+        loadDataToTblVariants();
+
+        $(document).on('click', '.trash', function () {
+            let btn=$(this);
+            let text = "Bạn có chắc muốn xoá sản phẩm <?=$product->getName()?>?";
+            Swal.fire({
+                title: "Xoá dữ liệu?",
+                text: text,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Xoá sản phẩm",
+                cancelButtonText:"Huỷ xoá"
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    run_waitMe();
+                    btn.prop('disabled', true);
+                    btn.find('i')
+                        .removeClass('fa-trash-alt')
+                        .addClass('fa-spinner fa-spin');
+
+                    var url = "<?=$this->url('product-admin',['action'=>'delete'])?>";
+                    $.ajax({
+                        method: "POST",
+                        headers: {Accept: "application/json; charset=utf-8"},
+                        url: url,
+                        data: {id:<?=$product->getId()?>}
+                    }).done(function (response) {
+                        if(response.status){
+                            Swal.fire({
+                                icon: "success",
+                                confirmButtonText: "Đã hiểu",
+                                html: 'Đã xoá sản phẩm <b><?=$product->getName()?>!</b>',
+                                allowOutsideClick: false
+                            }).then((result) => {
+                                if (result.isConfirmed)
+                                    window.location.href = "<?=$this->url('product-admin',["action"=>'list'])?>";
+                            });
+                        }else{
+                            Swal.fire({icon: "error", title: "Oops...", text: response.message});
+                            btn.find('i').removeClass('fa-spinner fa-spin').addClass('fa-trash-alt')
+                            btn.prop('disabled', false);
+                        }
+                        stop_waitMe()
+                    })
+                }
+            });
+        });
+
+
+    });
+
+    function loadDataToTblVariants(){
+        let i=1;
+        tblVariants.clear().draw();
+        $.each( variantsData, function( key, value ) {
+            let dataItem=[];
+            dataItem.push(value);
+            dataItem.push(i++);
+            dataItem.push(value.barcode);
+            dataItem.push(value.name);
+            dataItem.push(value.unit.name);
+            dataItem.push(value.conversion_rate);
+            dataItem.push(value.effective_price);
+            dataItem.push(value.id);
+            tblVariants.row.add(dataItem).draw(false); // Add new data
+        })
+    }
+</script>

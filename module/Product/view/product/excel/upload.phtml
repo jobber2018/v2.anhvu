@@ -1,0 +1,72 @@
+<?php
+
+use Sulde\Service\Common\Define;
+
+?>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="padding-bottom-15">
+                            <a href="/assets/files/products-template.xlsx">Tải file excel mẫu</a> danh sách sản phẩm.
+                        </div>
+                        <form action="#" class="dropzone" id="myDropzone"></form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--dropzone-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/dropzone/css/dropzone.min.css"/>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/dropzone/custom.css"/>
+<script src="/vendor/adminlte/plugins/dropzone/js/dropzone.min.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/lightbox2/css/lightbox.min.css"/>
+<script src="/vendor/adminlte/plugins/lightbox2/js/lightbox.min.js"></script>
+
+<script>
+    Dropzone.autoDiscover = false;
+    let dz=new Dropzone("#myDropzone", {
+        url: "<?=$this->url('product-excel-admin',['action'=>'upload'])?>",
+        addRemoveLinks: false,
+        acceptedFiles: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        dictDefaultMessage: "Kéo thả, hoặc kick vào khung bên dưới để upload file excel dữ liệu sản phẩm (Chỉ upload file .xlsx). Dung lượng ảnh không quá 10MB",
+        init: function () {
+            const dz = this;
+            function toggleMessage() {
+                $(".dz-message").toggle(dz.files.length === 0);
+            }
+            toggleMessage();
+            dz.on("addedfile", function (file) {
+                toggleMessage();
+                run_waitMe();
+            });
+
+            // Xử lý upload thành công
+            dz.on("success", function(file, response) {
+                if(response.status == 1) {
+                    dz.emit("thumbnail", file, "/assets/images/icons/excel-icon.jpg");
+                    file.previewElement.classList.add("pdf-preview");
+                    waitMeMessage('<?=Define::MESSAGE_WINDOW_REDIRECT?>')
+                    window.location.href = '<?=$this->url('product-excel-admin',['action'=>'preview'])?>';
+                } else {
+                    file.previewElement.classList.add("dz-error");
+                    Toast.fire({title: response.message, icon: 'error'});
+                }
+                toggleMessage();
+            });
+            dz.on("error", function (file, errorMessage, xhr) {
+                Toast.fire({title: errorMessage, icon: 'error'});
+                dz.removeFile(file);
+                toggleMessage();
+                stop_waitMe();
+            });
+        }
+    });
+    $(document).ready(function () {
+
+    });
+</script>
