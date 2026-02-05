@@ -1,0 +1,188 @@
+body{font-size: 0.9rem; font-family: "Roboto", sans-serif}
+.note-info{
+  background: #f5f6f9;
+  padding: 10px;
+  border-left: 5px solid #127b8b;
+  border-radius: .25rem;
+}
+.icon{width: 24px;height: 24px}
+.icon-lg{width: 30px;height: 30px}
+.padding-left-0{padding-left: 0px}
+.padding-left-15{padding-left: 15px}
+.padding-left-25{padding-left: 25px}
+.margin-bottom-15{margin-bottom: 15px;}
+.margin-top-15{margin-top: 15px;}
+.padding-right-15{padding-right: 15px}
+.padding-right-0{padding-right: 0px}
+.padding-top-5{padding-top: 5px}
+.padding-top-10{padding-top: 10px}
+.padding-top-15{padding-top: 15px}
+.padding-bottom-15{padding-bottom: 15px}
+.padding-bottom-5{padding-bottom: 5px}
+
+.highlight{font-weight: bold; font-size: 11pt}
+.number{text-align: right}
+.red-color, .text-red{color: red!important}
+.blue-color, .text-blue{color:#2691ec!important}
+.text-yellow{color: #f17e0c !important}
+.price{color: #2691ec; font-weight: bold;}
+
+
+div.datepicker td.today {
+  background: #d6e4f8;
+  color: #000000;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+table.dataTable tbody td.dt-body-right {
+  text-align: right;
+}
+.font-weight-bold{font-weight: bold}
+
+/*Begin datatable*/
+.dt-container table tr td{vertical-align: middle;}
+table.dataTable a {font-weight: bold;}
+table.dataTable img {
+  max-width: 40px;
+  max-height: 30px;
+}
+div.dataTables_processing {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 200px;
+  margin-left: -100px;
+  margin-top: -22px;
+  text-align: center;
+  padding: 2px;
+  z-index: 10;
+  font-weight: bold;
+  background: #00FF00;
+}
+tr.overdue {
+  background-color: #f8d7da !important;   /* đỏ nhạt */
+}
+.dt-container .dt-length label{display: none}
+div.dt-container .dt-length{width: 20%; float: right}
+div.dt-container .dt-length select{
+  float: right;              /* bỏ float */
+  padding-bottom: 8px;
+}
+.dt-container .dt-search label{display: none}
+div.dt-container .dt-search {
+  width: 70%;
+  float: left;
+  position: relative;
+  margin-bottom: 1rem;
+}
+div.dt-container .dt-search input {
+  width: 100%;
+  /*padding-bottom: 8px;*/
+  /*border-color: #80bdff;*/
+  outline: 0;
+  max-width: 450px !important;
+  border: 1px solid #ced4da;
+  border-radius: .25rem !important;       /* input Bootstrap / AdminLTE */
+  padding: .375rem .75rem;
+  padding-left: 2.2rem !important;        /* chừa chỗ icon search */
+  height: calc(2.25rem + 2px);
+  box-shadow: none !important;
+}
+div.dt-container .dt-search::before {
+  content: "\f002";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+}
+table.dataTable>tbody>tr.selected>*{
+  box-shadow:inset 0 0 0 9999px rgb(241 156 33 / 10%);
+  color: unset;
+  border-bottom: 1px solid rgba(241, 126, 12, 0.67);
+  border-top: 1px solid rgba(241, 126, 12, 0.67);
+}
+table.dataTable.stripe>tbody>tr:nth-child(odd).selected>*, table.dataTable.display>tbody>tr:nth-child(odd).selected>*{
+  box-shadow:inset 0 0 0 9999px rgb(241 156 33 / 10%);
+}
+
+table.dataTable.hover>tbody>tr.selected:hover>*, table.dataTable.display>tbody>tr.selected:hover>*{
+  box-shadow: inset 0 0 0 9999px rgb(241 156 33 / 10%) !important;
+  box-shadow: inset 0 0 0 9999px rgb(241 156 33 / 10%) !important
+}
+table.dataTable>tbody>tr.selected a{color: #007bff}
+.highlight-col{background-color: #e8e9eb75}
+tr.row-deleting {
+  opacity: 0.3;
+  pointer-events: none; /* chặn click toàn row */
+}
+/*End datatable*/
+.number{text-align: right}
+.ui-draggable-handle{border-bottom: 1px solid #e5e5e5}
+.title{font-weight: bold}
+.error li{list-style: none; margin-left: -40px; color: red}
+.alert-danger .error li{color: white}
+
+/*Dropzone*/
+.dz-preview.default-image {
+  border: 1px solid #007bff !important;
+  position: relative;
+}
+
+.dz-preview.default-image::after {
+  content: "⭐ Mặc định";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: #007bff;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.dz-highlight {
+  box-shadow: 0 6px 20px rgba(60,139,188,0.15);
+  background: linear-gradient(90deg, rgba(60,139,188,0.03), rgba(60,139,188,0.01));
+  border: 1px solid #3c8dbc;
+}
+.dz-default-label {
+  position: absolute;
+  top: 6px;
+  left: -6px;
+  background: #3d8dbc;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  z-index: 10;
+}
+/*End Dropzone*/
+/*------swal2-----------*/
+.swal2-popup.swal2-toast{padding: .75rem .25rem}
+.swal2-toast.swal2-popup {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px; /* khoảng cách icon - text */
+}
+
+/*----------------------table*/
+.table-responsive .table tr:first-child > th,
+.table-responsive .table tr:first-child > td {
+  border-top: 0;
+}
+.table-responsive .table td, .table-responsive.table th{padding: .6rem}
+
+/*       bootstrap Tags input--------*/
+.bootstrap-tagsinput .tag {
+  background: #3c8dbc;
+  padding: .2rem .5rem;
+  border-radius: .25rem;
+}
+
+/*Adminlte----------------*/
+.card-header>.card-tools{margin-right:unset}
