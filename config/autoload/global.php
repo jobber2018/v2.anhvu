@@ -43,7 +43,7 @@ return [
                     'port'     => '3306',
                     'user'     => 'root',
                     'password' => '',
-                    'dbname'   => 'anhvu_v2',
+                    'dbname'   => 'v2.anhvu',
                     'charset'  =>  'UTF8',
                 ],
             ]

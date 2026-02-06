@@ -11,6 +11,7 @@
  * This should be an array of module namespaces used in the application.
  */
 return [
+    'Laminas\Paginator',
     'Zend\Paginator',
     'Laminas\ServiceManager\Di',
     'Laminas\Navigation',
@@ -29,7 +30,6 @@ return [
     'Laminas\Form',
     'Laminas\InputFilter',
     'Laminas\Filter',
-    'Laminas\Paginator',
     'Laminas\Hydrator',
     'Laminas\Router',
     'Laminas\Validator',
