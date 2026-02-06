@@ -11,10 +11,9 @@
  * file.
  */
 
-use Zend\Session\Config\SessionConfig;
-use Zend\Session\Storage\SessionArrayStorage;
-use Zend\Session\Validator\HttpUserAgent;
-use Zend\Session\Validator\RemoteAddr;
+use Laminas\Session\Storage\SessionArrayStorage;
+use Laminas\Session\Validator\HttpUserAgent;
+use Laminas\Session\Validator\RemoteAddr;
 
 return [
     /*'doctrine' => [
@@ -43,7 +42,7 @@ return [
                     'port'     => '3306',
                     'user'     => 'root',
                     'password' => '',
-                    'dbname'   => 'anhvu_v2',
+                    'dbname'   => 'v2.anhvu',
                     'charset'  =>  'UTF8',
                 ],
             ]
