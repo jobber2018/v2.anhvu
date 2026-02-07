@@ -117,7 +117,7 @@ class AdminController extends SuldeAdminController
                 if(!$customerName)
                     throw new \Exception('Tên cửa hàng không được để trống!');
 
-                $customerNameAlias = str_replace("-"," ",Common::convertAlias($customerName));
+                $keyword = str_replace("-"," ",Common::convertAlias($customerName));
 
                 $customerOwnerName=trim($data['owner_name']);
                 if(!$customerOwnerName)
@@ -144,7 +144,7 @@ class AdminController extends SuldeAdminController
 
                 $customer = new Customer();
                 $customer->setName($customerName);
-                $customer->setNameAlias($customerNameAlias);
+                $customer->setKeyword($keyword);
                 $customer->setOwnerName($customerOwnerName);
                 $customer->setMobile($customerMobile);
                 $customer->setNote($data['note']);
@@ -221,7 +221,7 @@ class AdminController extends SuldeAdminController
                     throw new \Exception('Tên cửa hàng không được để trống!');
 
 //                $customerNameAlias = Common::convertAlias($customerName);
-                $customerNameAlias = str_replace("-"," ",Common::convertAlias($customerName));
+                $keyword = str_replace("-"," ",Common::convertAlias($customerName));
 
                 $customerOwnerName=trim($data['owner_name']);
                 if(!$customerOwnerName)
@@ -246,7 +246,7 @@ class AdminController extends SuldeAdminController
                 $customer = $this->customerManager->getById($customerId);
 
                 $customer->setName($customerName);
-                $customer->setNameAlias($customerNameAlias);
+                $customer->setKeyword($keyword);
                 $customer->setOwnerName($customerOwnerName);
                 $customer->setMobile($customerMobile);
                 $customer->setNote($data['note']);

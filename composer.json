@@ -58,7 +58,8 @@
             "Product\\": "module/Product/src/",
             "Purchase\\": "module/Purchase/src/",
             "Supplier\\": "module/Supplier/src/",
-            "Customer\\": "module/Customer/src/"
+            "Customer\\": "module/Customer/src/",
+            "Order\\": "module/Order/src/"
         }
     },
     "autoload-dev": {

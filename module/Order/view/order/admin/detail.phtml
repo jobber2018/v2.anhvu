@@ -1,0 +1,469 @@
+<?php
+
+use Sulde\Service\Common\Common;
+use Sulde\Service\Common\ConfigManager;
+use Sulde\Service\Common\Define;
+?>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <div class="user-block">
+                            <img class="img-circle" src="/assets/images/avatar.png">
+                            <span class="username"><a href="#"><?=$this->purchase->getSupplier()->getName()?></a></span>
+                            <span class="description"><?=$this->purchase->getSupplier()->getAddress()?> - <?=Common::formatDateTime($this->purchase->getCreatedDate())?></span>
+                        </div>
+                        <div class="card-tools">
+                        <?php
+                        //chi hiển thị button sửa, nhập kho khi đơn chưa nhập kho
+                        if($this->purchase->getStatus()!=Define::PURCHASE_APPROVAL){
+                            ?>
+                            <a href="<?=$this->url('purchase-admin',['action'=>'edit','id'=>$this->purchase->getPublicId()])?>" class="btn btn-info">
+                                <span class="fa fa-edit"></span>
+                                Sửa đơn
+                            </a>
+                            <button id="btnApproval" class="btn btn-danger">
+                                <span class="fa fa-gavel"></span>
+                                Nhập kho
+                            </button>
+                        <?php }?>
+
+                        <?php
+                        //chi hiển thị button tra hang khi don da nhap kho
+                        if($this->purchase->getStatus()==Define::PURCHASE_APPROVAL){
+                            ?>
+                            <a href="<?=$this->url('purchase-return-admin',['action'=>'add','id'=>$this->purchase->getPublicId()])?>" class="btn btn-warning">
+                                <span class="fa fa-reply"></span>
+                                Trả hàng
+                            </a>
+                            <?php
+                        }
+                        ?>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="display" id="tblProduct">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>STT</th>
+                                <th></th>
+                                <th>Mã</th>
+                                <th>Sản phẩm</th>
+                                <th class="number" nowrap="">Quy cách</th>
+                                <th nowrap="">Đơn vị</th>
+                                <th class="number" nowrap="">Số lượng</th>
+                                <th class="number" nowrap="">Đơn giá</th>
+                                <th class="number" nowrap="">Thành tiền</th>
+                                <th class="number" nowrap="">Thuế GTGT</th>
+                                <th class="number" nowrap="">Tiền thuế GTGT</th>
+                                <th class="number" nowrap="">Chiết khẩu</th>
+                                <th class="number" nowrap="">Tiền chiết khẩu</th>
+                                <th class="number" nowrap="">Phải thanh toán</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot></tfoot>
+                        </table>
+                        <div class="row">
+                            <div class="col-md-8"></div>
+                            <div class="col-md-4">
+                                <div class="purchase_summary_amount_preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-default collapsed-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i>
+                            Thông tin đơn hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <tr>
+                                    <td nowrap="">Mã đơn hàng: </td>
+                                    <td style="width: 90%"><?=$this->purchase->getOrderCode()?></td>
+                                </tr>
+                                <tr>
+                                    <td>Trạng thái: </td>
+                                    <td>
+                                        <?php
+                                        $cls=($this->purchase->getStatus()==Define::STATUS_APPROVED)?'badge-success':'badge-warning';
+                                        ?>
+                                        <span class="badge <?=$cls?>"><?=$this->translate($this->purchase->getStatus())?></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td nowrap="">Tổng sản phẩm: </td>
+                                    <td><?=$this->purchase->getQuantityOfProduct()?></td>
+                                </tr>
+                                <tr>
+                                    <td>Ngày tạo: </td>
+                                    <td><?=Common::formatDateTime($this->purchase->getCreatedDate())?></td>
+                                </tr>
+                                <tr>
+                                    <td>Người tạo: </td>
+                                    <td><?=$this->purchase->getCreatedBy()?></td>
+                                </tr>
+                                <tr>
+                                    <td>Ngày duyệt: </td>
+                                    <td><?=Common::formatDateTime($this->purchase->getApprovedDate())?></td>
+                                </tr>
+                                <tr>
+                                    <td>Người duyệt: </td>
+                                    <td><?=$this->purchase->getApprovedBy()?></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-default purchase_summary_amount_preview"></div>
+                <?php
+                $totalPurchasePriceReturn=0;
+                if(count($this->purchase->getPurchaseReturn())){
+                    foreach($this->purchase->getPurchaseReturn() as $purchaeReturnItem){
+                        ?>
+                        <div class="card card-default">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    Trả lại
+                                </h3>
+                                <div class="card-tools">
+                                    <small class="badge badge-success"><?=$this->translate($purchaeReturnItem->getStatus())?></small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="note-info">
+                                    <?=$purchaeReturnItem->getNote()?>
+                                </div>
+
+                                <?php
+                                echo '<table class="table"><thead>';
+                                echo '<tr><th>Sản phẩm</th><th>SL</th><th>ĐV</th></tr></thead><tbody>';
+                                foreach($purchaeReturnItem->getPurchaseReturnDetail() as $purchaseReturnDetailItem){
+                                    echo '<tr class="return-item">'.
+                                        '<td class="title">'.$purchaseReturnDetailItem->getVariant()->getProduct()->getName().'</td>'.
+                                        '<td>'.Common::formatNumber($purchaseReturnDetailItem->getQty()).'</td>'.
+                                        '<td>'.$purchaseReturnDetailItem->getVariant()->getUnit()->getName().'</td>'.
+                                        '</tr>';
+                                    if($purchaeReturnItem->getStatus()==Define::STATUS_APPROVED){
+                                        $totalPurchasePriceReturn+=$purchaseReturnDetailItem->getQty()*$purchaseReturnDetailItem->getPrice();
+                                    }
+                                }
+                                echo '</tbody></table>';
+                                ?>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                }
+                //show getAdditionalFees neeus cos
+                if(count($this->purchase->getAdditionalFees())){
+                        ?>
+                        <div class="card card-default">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    Phụ phí
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <table>
+                                <?php
+                                foreach($this->purchase->getAdditionalFees() as $additionalFees) {
+                                    $amount=Common::formatMoney($additionalFees->getAmount());
+                                    $name = ($additionalFees->getSupplier()->getShortName())?$additionalFees->getSupplier()->getShortName():$additionalFees->getSupplier()->getName();
+                                    echo <<<HTML
+                                            <tr>
+                                                <td colspan="2">
+                                                    {$name}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width: 100%">{$additionalFees->getName()}</td>
+                                                <td nowrap class="price">{$amount}</td>
+                                            </tr>
+                                            HTML;
+                                }
+                                ?>
+                                </table>
+                            </div>
+                        </div>
+                        <?php
+                }
+                ?>
+                <?=$this->partial('purchase/partial/message', ['purchase'=>$this->purchase,'userLogin'=>$this->userLogin]);?>
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-download"></i>
+                            Hoá đơn nhập hàng
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="#" class="dropzone" id="myDropzone"></form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--dropzone-->
+<link rel="stylesheet" href="/vendor/adminlte/plugins/dropzone/css/dropzone.min.css"/>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/dropzone/custom.css"/>
+<script src="/vendor/adminlte/plugins/dropzone/js/dropzone.min.js"></script>
+<script src="/vendor/adminlte/plugins/dropzone/custom.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/lightbox2/css/lightbox.min.css"/>
+<script src="/vendor/adminlte/plugins/lightbox2/js/lightbox.min.js"></script>
+
+<!--Datatable fixed column-->
+<script src="/vendor/adminlte/plugins/datatables/2.3.5/js/dataTables.fixedColumns.min.js"></script>
+<link rel="stylesheet" href="/vendor/adminlte/plugins/datatables/2.3.5/css/fixedColumns.dataTables.css">
+
+<style>
+    div.dt-container div.dt-layout-row div.dt-layout-cell{display:unset}
+</style>
+
+<?=$this->partial('purchase/partial/amount-info');?>
+
+<script>
+    const dz = initCustomDropzone({
+        selector: "#myDropzone",
+        uploadUrl: "<?=$this->url('purchase-admin',['action'=>'upload-invoice','id'=>$this->purchase->getId()])?>",
+        deleteUrl: "<?=$this->url('purchase-admin',['action'=>'delete-invoice'])?>",
+        fileListUrl: "<?=$this->url('purchase-admin',['action'=>'file-list','id'=>$this->purchase->getId()])?>"
+    });
+</script>
+<script>
+    let tblProduct;
+    $( document ).ready(function() {
+        tblProduct=$('#tblProduct').DataTable({
+            responsive: isMobile,
+            fixedColumns: isMobile ? false : {
+                start: 4
+            },
+            select:true,
+            paging: false,
+            pageLength:<?=\Sulde\Service\Common\Define::ITEM_PAGE_COUNT?>,
+            ordering: false,
+            info: false,
+            // order: [[ 1, "desc" ]],
+            stateSave: true,
+            autoWidth: false,
+            scrollCollapse: true,
+            scrollX: true,
+            scrollY: '60vh',
+            layout: {
+                topStart: null,  // ❌ tắt ô search mặc định
+                topEnd: null,    // ❌ tắt length dropdown mặc định
+                top: ['search']
+            },
+            language: {
+                searchPlaceholder: "Tìm kiếm sản phẩm."
+            },
+            columnDefs: [
+                {
+                    targets: [7,8,9,12,13],
+                    className: 'highlight-col'
+                },{
+                    name:'rowData',
+                    targets: 0,
+                    visible: false
+                },{
+                    name: 'img',
+                    targets: 2,
+                    width: '50px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        if (cellData) {
+                            $(td).html('<img src="'+cellData+'">');
+                        }
+                    }
+                },{
+                    name: 'name',
+                    targets: 4,
+                    width: '250px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let product=rowData[0].product;
+                        let content=`<a href="<?=$this->url('product-admin',['action'=>'detail'])?>/${product.public_id}" class="title name">${product.name}</a><br>`
+                        content+=(product.status==='<?=Define::DEFAULT_UN_ACTIVE?>' || product.status===null)?'<span class="badge badge-danger"><?=Define::PRODUCT_TEXT_UN_ACTIVE?></span> ':'';
+
+                        content+=(product?.purchase_detail_latest?.price)
+                            ?`<span class="badge badge-info" data-toggle="tooltip" data-placement="bottom" title="NCC: ${product.purchase_detail_latest.supplier.name}">
+                         Giá nhập gần đây: ${formatMoney(product.purchase_detail_latest.price)} ${product.purchase_detail_latest.unit_name}
+                         </span><br>`
+                            :'<span class="badge badge-info">Nhập lần đầu</span> ';
+
+                        content +=`<span class="badge badge-warning">Tồn kho: ${product.inventory} ${product.unit.name}</span>`;
+
+                        $(td).html(content);
+                    }
+                },{
+                    targets: [5],
+                    width: '150px'
+                },{
+                    name: 'price',
+                    targets: 8,
+                    className: 'number',
+                    width: '100px',
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let data=rowData[0];
+                        let product=data.product;
+                        let latest_unit_price = (product?.purchase_detail_latest?.base_unit_price)?product?.purchase_detail_latest?.base_unit_price:0;
+                        let current_unit_price = data.price/data.conversion_rate;
+
+                        let difference=0;
+                        if(latest_unit_price>0){
+                            difference=current_unit_price - latest_unit_price;
+
+                            if(difference>0)
+                                difference= '<br><small class="fa fa-arrow-up text-red"> ' +formatMoney(difference)+'</small>';
+                            else if(difference<0)
+                                difference='<br><small class="fa fa-arrow-down text-blue"> '+formatMoney(difference)+'</small>';
+                            else
+                                difference= '<br><small class="fa fa-minus text-yellow"> ' +formatMoney(difference)+'</small>';
+                        }
+
+                        let price = formatMoney(cellData);
+                        $(td).html(price+difference);
+                    }
+                },{
+                    name: 'total_price',
+                    targets: 9,
+                    className: 'number price',
+                },{
+                    name: 'discount',
+                    targets: 12,
+                    className: 'number',
+                },{
+                    name: 'payable',
+                    targets: 14,
+                    className: 'price'
+
+                }
+            ],
+            ajax: {
+                url: '<?=$this->url('purchase-admin',['action'=>'detail'])?>',
+                type: 'POST',
+                data:{id:<?=$this->purchase->getId()?>},
+                dataSrc: function (response) {
+                    let purchase_summary={};
+                    purchase_summary.total_order_amount=formatMoney(response.total_order_amount)
+
+                    let total_discount_amount=getRawMoney(response.discount_amount.order_discount_amount) + getRawMoney(response.discount_amount.product_discount_amount);
+                    purchase_summary.order_discount_amount=formatMoney(response.discount_amount.order_discount_amount)
+                    purchase_summary.product_discount_amount=formatMoney(response.discount_amount.product_discount_amount)
+                    purchase_summary.total_discount_amount=formatMoney(total_discount_amount)
+
+                    purchase_summary.total_vat_amount=formatMoney(response.total_vat_amount)
+
+                    let total_product_payable = response.total_order_amount - total_discount_amount + response.total_vat_amount;
+                    purchase_summary.total_product_payable=formatMoney(total_product_payable);
+
+                    purchase_summary.total_additional_fees_amount=formatMoney(response.total_additional_fees_amount)
+
+                    let total_order_payable=total_product_payable+response.total_additional_fees_amount;
+                    purchase_summary.total_order_payable=formatMoney(total_order_payable)
+
+                    let template = $('#purchase-amount-info').html();
+                    let purchase_summary_amount_preview = Mustache.render(template, purchase_summary);
+                    $('.purchase_summary_amount_preview').html(purchase_summary_amount_preview)
+                    $('[data-toggle="tooltip"]').tooltip();
+
+                    let data=[];
+                    let i=1;
+                    $.each( response.purchase_detail, function( key, value ) {
+                        let dataItem=[];
+                        dataItem.push(value);
+                        dataItem.push(i++);
+                        dataItem.push(value.product.default_image);
+                        dataItem.push(subBarcode(value.variant.barcode));
+                        dataItem.push(value.product.name);
+                        dataItem.push(value.variant.name);
+                        dataItem.push(value.unit_name);
+                        dataItem.push(formatNumber(value.qty));
+                        dataItem.push(value.price);
+                        dataItem.push(formatMoney(value.total_amount));
+                        dataItem.push(intVal(value.vat)+'%');
+
+                        let totalVatAmount=value.vat_amount*value.qty;
+                        dataItem.push(formatMoney(value.vat_amount));
+
+                        let discount = (value.discount_type==='<?=Define::PERCENT?>')?intVal(value.discount)+'%':formatMoneyVND(value.discount);
+                        dataItem.push(discount);
+
+                        let totalProductDiscount=value.discount_amount*value.qty;
+                        dataItem.push(formatMoney(value.discount_amount));
+
+                        let totalProductPayable=value.total_amount + totalVatAmount - totalProductDiscount;
+                        dataItem.push(formatMoney(totalProductPayable));
+                        data.push(dataItem);
+                    });
+                    return data;
+                }
+            }
+        });
+
+        $('#btnApproval').on('click', function(e){
+            e.preventDefault();
+            let text = 'Vui lòng kiểm tra cẩn thận đơn hàng. Vì phê duyệt sẽ làm thay đổi số lượng tồn kho của sản phẩm và có thể thay đổi giá vốn sản phẩm! Nhấn phê duyệt nếu bạn vẫn muốn tiếp tục.';
+
+            Swal.fire({
+                title: "Phê duyệt đơn hàng?",
+                html: text,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Phê duyệt",
+                cancelButtonText:"Huỷ duyệt"
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    run_waitMe();
+                    var url = "<?=$this->url('purchase-admin',['action'=>'approval'])?>";
+                    $.ajax({
+                        method: "POST",
+                        headers: {Accept: "application/json; charset=utf-8"},
+                        url: url,
+                        data: {id:'<?=$this->purchase->getPublicId()?>'}
+                    }).done(function (response) {
+                        if(response.status){
+                            Toast.fire({title: response.message, icon: 'success'});
+                            location.reload();
+                        }
+                        else{
+                            Swal.fire({icon: "error", title: "Oops...", text: response.message});
+                            stop_waitMe();
+                        }
+                    })
+                }
+            });
+        });
+
+    })
+</script>

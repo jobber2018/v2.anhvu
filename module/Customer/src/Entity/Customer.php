@@ -61,8 +61,8 @@ class Customer
     /** @orm\Column(type="string", name="name") */
     private $name;
 
-    /** @orm\Column(type="string", name="name_alias") */
-    private $name_alias;
+    /** @orm\Column(type="string", name="keyword") */
+    private $keyword;
 
     /** @orm\Column(type="string", name="owner_name") */
     private $ownerName;
@@ -144,17 +144,17 @@ class Customer
     /**
      * @return mixed
      */
-    public function getNameAlias()
+    public function getKeyword()
     {
-        return $this->name_alias;
+        return $this->keyword;
     }
 
     /**
-     * @param mixed $name_alias
+     * @param mixed $keyword
      */
-    public function setNameAlias($name_alias): void
+    public function setKeyword($keyword): void
     {
-        $this->name_alias = $name_alias;
+        $this->keyword = $keyword;
     }
 
     /**
@@ -382,7 +382,7 @@ class Customer
             'group_id' => $this->getGroup()->getId(),
             'route_id' => $this->getRoute()->getId(),
             'name' => $this->getName(),
-            'name_alias' => $this->getNameAlias(),
+            'name_alias' => $this->getKeyword(),
             'owner_name' => $this->getOwnerName(),
             'mobile' => $this->getMobile(),
             'status' => $this->getStatus(),

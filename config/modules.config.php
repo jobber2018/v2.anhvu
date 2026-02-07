@@ -44,5 +44,6 @@ return [
     'Product',
     'Purchase',
     'Supplier',
-    'Customer'
+    'Customer',
+    'Order'
 ];

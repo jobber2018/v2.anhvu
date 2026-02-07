@@ -76,7 +76,7 @@ class CustomerManager
             ->setMaxResults($length);
 
         if(!empty($p_keyword)){
-            $queryBuilder->where('LOWER(c.name) LIKE :keyword')
+            $queryBuilder->where('LOWER(c.keyword) LIKE :keyword')
                 ->orWhere('LOWER(c.mobile) LIKE :keyword')
                 ->orWhere('LOWER(g.name) LIKE :keyword')
                 ->orWhere('LOWER(r.name) LIKE :keyword')

@@ -144,7 +144,7 @@ $form->prepare();
 <script>
     let customerImage= '<?=$this->customer->getImage()?>';
     customerImagePath =  (customerImage)?"<?=Define::CUSTOMER_IMAGE_PATH.$this->customer->getImage()?>":"<?=Define::NO_IMAGE_PATH?>";
-    $( document ).ready(function() {
+    $(document ).ready(function() {
         $("#imageFile").fileinput({
             showUpload: false,
             showCaption: false,
